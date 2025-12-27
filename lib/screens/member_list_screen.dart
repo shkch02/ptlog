@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../data/mock_data.dart'; // 더미 데이터 import
-import '../models/index.dart'; // 모델 import
+import '../data/mock_data.dart'; // 더미 데이터
+import '../models/index.dart'; // 모델
 
-class MemberListScreen extends StatefulWidget { //검색 기능 구현위해 statefulwidget 사용
+class MemberListScreen extends StatefulWidget {
   const MemberListScreen({super.key});
 
   @override
@@ -11,12 +11,22 @@ class MemberListScreen extends StatefulWidget { //검색 기능 구현위해 sta
 }
 
 class _MemberListScreenState extends State<MemberListScreen> {
-  // 실제로는 상위 상태관리에서 받아와야 하지만, 데모를 위해 로컬 state 사용
-  List<Member> members = mockMembers; 
-  String searchQuery = '';//사용자가 검색창에 입력한 값 저장하는 변수
+  // 데이터 연동
+  List<Member> members = mockMembers;
+  String searchQuery = '';
+
+  // ------------------------------------------------------------------------
+  // 기능: 회원 상세 팝업 띄우기 (Source 2의 기능)
+  // ------------------------------------------------------------------------
+  void _showMemberDetail(BuildContext context, Member member) {
+    showDialog(
+      context: context,
+      builder: (context) => MemberDetailDialog(member: member),
+    );
+  }
 
   @override
-  Widget build(BuildContext context) { //build : 화면이 갱신 될 때마다 호출되는 함수
+  Widget build(BuildContext context) {
     // 검색 필터링
     final filteredMembers = members.where((member) =>
       member.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
@@ -28,9 +38,9 @@ class _MemberListScreenState extends State<MemberListScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Header & Add Button
-          Row(//헤더
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,//양쪽 끝 정렬
+          // 1. 헤더 (Source 1의 스타일 유지)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +60,7 @@ class _MemberListScreenState extends State<MemberListScreen> {
           ),
           const SizedBox(height: 16),
           
-          // 검색 바
+          // 2. 검색 바 (Source 1 & 2 공통)
           TextField(
             onChanged: (value) => setState(() => searchQuery = value),
             decoration: InputDecoration(
@@ -71,79 +81,13 @@ class _MemberListScreenState extends State<MemberListScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 회원 목록
-          Expanded(//남은 공간은 전부 회원 목록
+          // 3. 회원 목록 (Source 1의 상세한 디자인 + Source 2의 클릭 이벤트)
+          Expanded(
             child: ListView.builder(
               itemCount: filteredMembers.length,
               itemBuilder: (context, index) {
                 final member = filteredMembers[index];
-                return Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey[200]!),
-                  ),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  color: Colors.white,
-                  child: InkWell(
-                    onTap: () {
-                      // TODO: 회원 상세 다이얼로그
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundImage: NetworkImage(member.profileImage ?? ''),
-                                onBackgroundImageError: (_, __) {},
-                                child: member.profileImage == null ? Text(member.name[0]) : null,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(member.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 4),
-                                    _buildSessionBadge(member.remainingSessions, member.totalSessions),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _buildInfoRow(LucideIcons.phone, member.phone),
-                          const SizedBox(height: 4),
-                          _buildInfoRow(LucideIcons.mail, member.email),
-                          const SizedBox(height: 4),
-                          _buildInfoRow(LucideIcons.calendar, '등록일: ${member.registrationDate}'),
-                          if (member.notes.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.amber[50],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(LucideIcons.alertCircle, size: 16, color: Colors.amber[900]),
-                                  const SizedBox(width: 8),
-                                  Expanded(child: Text(member.notes, style: TextStyle(fontSize: 12, color: Colors.amber[900]))),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return _buildRichMemberCard(member);
               },
             ),
           ),
@@ -152,6 +96,83 @@ class _MemberListScreenState extends State<MemberListScreen> {
     );
   }
 
+  // Source 1의 상세한 카드 디자인을 위젯으로 분리
+  Widget _buildRichMemberCard(Member member) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!),
+      ),
+      margin: const EdgeInsets.only(bottom: 12),
+      color: Colors.white,
+      child: InkWell(
+        // 핵심: 여기서 팝업 호출 함수를 연결
+        onTap: () => _showMemberDetail(context, member), 
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 상단: 프로필 + 이름 + 뱃지
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundImage: NetworkImage(member.profileImage ?? ''),
+                    onBackgroundImageError: (_, __) {},
+                    child: member.profileImage == null ? Text(member.name[0]) : null,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(member.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        _buildSessionBadge(member.remainingSessions, member.totalSessions),
+                      ],
+                    ),
+                  ),
+                  const Icon(LucideIcons.chevronRight, color: Colors.grey),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // 정보 행들
+              _buildInfoRow(LucideIcons.phone, member.phone),
+              const SizedBox(height: 4),
+              _buildInfoRow(LucideIcons.mail, member.email),
+              const SizedBox(height: 4),
+              _buildInfoRow(LucideIcons.calendar, '등록일: ${member.registrationDate}'),
+              
+              // 메모 경고창
+              if (member.notes.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.alertCircle, size: 16, color: Colors.amber[900]),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(member.notes, style: TextStyle(fontSize: 12, color: Colors.amber[900]), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 헬퍼 위젯: 아이콘 + 텍스트
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
@@ -162,6 +183,7 @@ class _MemberListScreenState extends State<MemberListScreen> {
     );
   }
 
+  // 헬퍼 위젯: 남은 횟수 뱃지
   Widget _buildSessionBadge(int remaining, int total) {
     final ratio = remaining / total;
     Color color = Colors.grey;
@@ -188,6 +210,215 @@ class _MemberListScreenState extends State<MemberListScreen> {
         '$remaining/$total 회 남음',
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
       ),
+    );
+  }
+}
+
+// ------------------------------------------------------------------------
+// 팝업 다이얼로그 (Source 2의 상세 기능 전체 포함)
+// ------------------------------------------------------------------------
+class MemberDetailDialog extends StatefulWidget {
+  final Member member;
+
+  const MemberDetailDialog({super.key, required this.member});
+
+  @override
+  State<MemberDetailDialog> createState() => _MemberDetailDialogState();
+}
+
+class _MemberDetailDialogState extends State<MemberDetailDialog> {
+  late TextEditingController _notesController;
+  late List<Schedule> _memberSchedules;
+  late List<PaymentLog> _memberPayments;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController = TextEditingController(text: widget.member.notes);
+    _memberSchedules = mockSchedules.where((s) => s.memberId == widget.member.id).toList();
+    _memberPayments = mockPaymentLogs.where((p) => p.memberId == widget.member.id).toList();
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  void _editScheduleTime(Schedule schedule) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: 10, minute: 0),
+    );
+    if (picked != null) {
+      setState(() {
+        // UI 갱신 (실제 DB 연동 필요)
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${picked.format(context)}로 시간이 변경되었습니다 (더미)'))
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        height: 600, // 팝업 높이 고정
+        padding: const EdgeInsets.all(16),
+        child: DefaultTabController(
+          length: 3,
+          child: Column(
+            children: [
+              // 팝업 헤더
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundImage: NetworkImage(widget.member.profileImage ?? ''),
+                    onBackgroundImageError: (_, __) {},
+                    child: widget.member.profileImage == null ? Text(widget.member.name[0]) : null,
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.member.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(widget.member.phone, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // 탭 바
+              const TabBar(
+                labelColor: Colors.blue,
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Colors.blue,
+                tabs: [
+                  Tab(text: '정보/메모'),
+                  Tab(text: '예약 관리'),
+                  Tab(text: '결제/연동'),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 탭 내용물
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildInfoTab(),
+                    _buildScheduleTab(),
+                    _buildHistoryTab(),
+                  ],
+                ),
+              ),
+              
+              // 닫기 버튼
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('닫기'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 탭 1: 메모 수정
+  Widget _buildInfoTab() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('특이사항 (메모)', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _notesController,
+            maxLines: 5,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              hintText: '회원의 특이사항을 입력하세요.',
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('메모가 저장되었습니다.'))
+                );
+              },
+              child: const Text('메모 저장'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 탭 2: 예약 목록
+  Widget _buildScheduleTab() {
+    if (_memberSchedules.isEmpty) {
+      return const Center(child: Text('예약된 스케줄이 없습니다.'));
+    }
+    return ListView.builder(
+      itemCount: _memberSchedules.length,
+      itemBuilder: (context, index) {
+        final schedule = _memberSchedules[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          color: Colors.grey[50],
+          child: ListTile(
+            title: Text('${schedule.date} ${schedule.startTime}'),
+            subtitle: Text(schedule.notes),
+            trailing: IconButton(
+              icon: const Icon(LucideIcons.edit2, size: 18),
+              onPressed: () => _editScheduleTime(schedule),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 탭 3: 결제 이력
+  Widget _buildHistoryTab() {
+    if (_memberPayments.isEmpty) {
+      return const Center(child: Text('결제/연동 이력이 없습니다.'));
+    }
+    return ListView.builder(
+      itemCount: _memberPayments.length,
+      itemBuilder: (context, index) {
+        final log = _memberPayments[index];
+        return ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: log.type == 'CRM연동' ? Colors.green[100] : Colors.blue[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              log.type == 'CRM연동' ? LucideIcons.link : LucideIcons.creditCard,
+              size: 16,
+              color: Colors.black87,
+            ),
+          ),
+          title: Text(log.type, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text('${log.date} | ${log.content}'),
+          trailing: Text(log.amount, style: const TextStyle(fontWeight: FontWeight.bold)),
+        );
+      },
     );
   }
 }

@@ -93,3 +93,23 @@ class WorkoutLog {
     required this.photos,
   });
 }
+
+// lib/models/index.dart 파일 맨 아래에 추가
+
+class PaymentLog {
+  final String id;
+  final String memberId;
+  final String date; // 결제일 or 연동일
+  final String type; // 'PT결제', '회원권', 'CRM연동' 등
+  final String content; // '10회 등록', '성공' 등
+  final String amount; // 금액 (옵션)
+
+  PaymentLog({
+    required this.id,
+    required this.memberId,
+    required this.date,
+    required this.type,
+    required this.content,
+    required this.amount,
+  });
+}

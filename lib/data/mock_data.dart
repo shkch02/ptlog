@@ -112,3 +112,44 @@ List<Member> mockMembers = [
     profileImage: null,
   ),
 ];
+
+List<Schedule> mockSchedules = [
+  Schedule(
+    id: 's1',
+    memberId: '1',
+    memberName: '김민수',
+    date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
+    startTime: '10:00',
+    endTime: '11:00',
+    notes: '등 운동 위주',
+    reminder: '10분 전 알림',
+  ),
+  Schedule(
+    id: 's2',
+    memberId: '2',
+    memberName: '이지은',
+    date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
+    startTime: '13:00',
+    endTime: '14:00',
+    notes: '하체 비만 관리',
+    reminder: '1시간 전 알림',
+  ),
+  Schedule(
+    id: 's3',
+    memberId: '1',
+    memberName: '김민수',
+    date: DateTime.now().add(const Duration(days: 1)).toString().split(' ')[0], // 내일
+    startTime: '10:00',
+    endTime: '11:00',
+    notes: '가슴 운동',
+    reminder: '10분 전 알림',
+  ),
+];
+
+
+List<PaymentLog> mockPaymentLogs = [
+  PaymentLog(id: 'p1', memberId: '1', date: '2024-12-01', type: 'PT결제', content: 'PT 20회 재등록', amount: '1,200,000원'),
+  PaymentLog(id: 'p2', memberId: '1', date: '2024-11-15', type: 'CRM연동', content: '입장 기록 연동', amount: '-'),
+  PaymentLog(id: 'p3', memberId: '2', date: '2024-12-10', type: '회원권', content: '3개월 연장', amount: '270,000원'),
+];
+
