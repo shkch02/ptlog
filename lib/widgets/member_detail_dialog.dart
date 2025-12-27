@@ -25,12 +25,13 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     _tabController = TabController(length: 4, vsync: this);
     _notesController = TextEditingController(text: widget.member.notes);
     
-    // 데이터 로드 및 정렬 (최신순)
     _memberSchedules = mockSchedules.where((s) => s.memberId == widget.member.id).toList();
+    
+    // 1. PT 세션 정렬: 과거 -> 미래 (오름차순)
     _memberSchedules.sort((a, b) {
       String dtA = '${a.date} ${a.startTime}';
       String dtB = '${b.date} ${b.startTime}';
-      return dtB.compareTo(dtA);
+      return dtA.compareTo(dtB); 
     });
 
     _memberPayments = mockPaymentLogs.where((p) => p.memberId == widget.member.id).toList();
@@ -63,7 +64,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        height: 650,
+        height: 700, 
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -71,22 +72,32 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
             Row(
               children: [
                 CircleAvatar(
-                  radius: 24,
+                  radius: 28,
                   backgroundImage: NetworkImage(widget.member.profileImage ?? ''),
                   onBackgroundImageError: (_, __) {},
                   child: widget.member.profileImage == null ? Text(widget.member.name[0]) : null,
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.member.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.member.phone, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(widget.member.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 8),
+                          // PT 횟수 배지
+                          _buildSessionBadge(widget.member.remainingSessions, widget.member.totalSessions),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(widget.member.phone, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             
             // 탭 바
             TabBar(
@@ -131,7 +142,9 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     );
   }
 
+  // ----------------------------------------------------------------------
   // 탭 1: PT 세션
+  // ----------------------------------------------------------------------
   Widget _buildPTSessionsTab() {
     if (_memberSchedules.isEmpty) {
       return const Center(child: Text('예약된 스케줄이 없습니다.'));
@@ -155,45 +168,64 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
 
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: BoxDecoration(
-            color: isPast ? Colors.grey[200] : Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: isPast ? null : Border.all(color: Colors.blue[100]!),
-            boxShadow: isPast ? null : [
-              BoxShadow(
-                color: Colors.blue.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              )
-            ],
+            color: isPast ? Colors.grey[100] : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: isPast ? Border.all(color: Colors.grey[300]!) : Border.all(color: Colors.blue[100]!, width: 1.5),
           ),
-          child: ListTile(
-            dense: true,
-            title: Text(
-              '${schedule.date} ${schedule.startTime}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isPast ? Colors.grey[600] : Colors.black87,
-                decoration: isPast ? TextDecoration.lineThrough : null,
-              ),
-            ),
-            subtitle: Text(
-              isPast ? '완료된 세션' : (schedule.notes.isNotEmpty ? schedule.notes : '예약됨'),
-              style: TextStyle(color: isPast ? Colors.grey : Colors.blue[800]),
-            ),
-            trailing: isPast 
-              ? const Icon(LucideIcons.checkCircle, size: 18, color: Colors.grey)
-              : IconButton(
-                  icon: const Icon(LucideIcons.edit2, size: 18, color: Colors.blue),
-                  onPressed: () => _editScheduleTime(schedule),
+          child: Row(
+            children: [
+              // 날짜 및 상태
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${schedule.date} ${schedule.startTime}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: isPast ? Colors.grey[600] : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isPast ? '완료' : (schedule.notes.isNotEmpty ? schedule.notes : '예약됨'),
+                      style: TextStyle(
+                        fontSize: 12, 
+                        color: isPast ? Colors.grey : Colors.blue[800],
+                        fontWeight: isPast ? FontWeight.normal : FontWeight.w600
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              
+              // 보고서 버튼
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('보고서 기능 준비중')));
+                },
+                icon: Icon(LucideIcons.fileText, size: 14, color: isPast ? Colors.grey[600] : Colors.blue),
+                label: Text('보고서', style: TextStyle(fontSize: 12, color: isPast ? Colors.grey[600] : Colors.blue)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  minimumSize: const Size(0, 32),
+                  side: BorderSide(color: isPast ? Colors.grey[400]! : Colors.blue),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
+  // ----------------------------------------------------------------------
   // 탭 2: 기본 정보
+  // ----------------------------------------------------------------------
   Widget _buildBasicInfoTab() {
     return SingleChildScrollView(
       child: Column(
@@ -213,6 +245,8 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                   const Divider(height: 16),
                   _buildInfoRow(LucideIcons.mail, '이메일', widget.member.email),
                   const Divider(height: 16),
+                  _buildInfoRow(LucideIcons.cake, '나이', '28세'), // 더미
+                  const Divider(height: 16),
                   _buildInfoRow(LucideIcons.calendar, '등록일', widget.member.registrationDate),
                 ],
               ),
@@ -220,7 +254,29 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           ),
           const SizedBox(height: 24),
           
-          _buildSectionTitle('신체 정보'),
+          // 신체 정보 헤더 + InBody 버튼
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 8.0, left: 4),
+                child: Text('신체 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('InBody 데이터 연동 중...')));
+                },
+                icon: const Icon(LucideIcons.link, size: 14),
+                label: const Text('InBody', style: TextStyle(fontSize: 12)),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  minimumSize: const Size(0, 32),
+                  backgroundColor: Colors.blue[50],
+                  foregroundColor: Colors.blue[700],
+                ),
+              ),
+            ],
+          ),
           Card(
             elevation: 0,
             color: Colors.grey[50],
@@ -230,10 +286,20 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                 children: [
                   _buildInfoRow(LucideIcons.ruler, '키', '175 cm'), 
                   const Divider(height: 16),
-                  // 수정됨: LucideIcons.weight -> LucideIcons.dumbbell
-                  _buildInfoRow(LucideIcons.dumbbell, '몸무게', '72 kg'),
+                  _buildInfoRow(LucideIcons.dumbbell, '현재 체중', '72 kg'),
                   const Divider(height: 16),
-                  _buildInfoRow(LucideIcons.activity, 'BMI', '23.5 (정상)'),
+                  _buildInfoRow(LucideIcons.target, '목표 체중', '68 kg'),
+                  const Divider(height: 16),
+                  _buildInfoRow(LucideIcons.percent, '현재 체지방', '18 %'),
+                  const Divider(height: 16),
+                  // ★ 수정됨: bicepsFlexed -> zap (아이콘 대체)
+                  _buildInfoRow(LucideIcons.zap, '현재 골격근량', '35 kg'),
+                  const Divider(height: 16),
+                  _buildInfoRow(LucideIcons.trendingUp, '목표 골격근량', '38 kg'),
+                  const Divider(height: 16),
+                  _buildInfoRow(LucideIcons.activity, '활동량', '보통'),
+                  const Divider(height: 16),
+                  _buildInfoRow(LucideIcons.moon, '수면 시간', '7시간'),
                 ],
               ),
             ),
@@ -256,13 +322,42 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
         Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 12),
         SizedBox(
-          width: 60,
+          width: 90, 
           child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
         ),
         Expanded(
           child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14), textAlign: TextAlign.right),
         ),
       ],
+    );
+  }
+
+  Widget _buildSessionBadge(int remaining, int total) {
+    final ratio = remaining / total;
+    Color color = Colors.grey;
+    Color bgColor = Colors.grey[100]!;
+    
+    if (ratio <= 0.2) {
+      color = Colors.red;
+      bgColor = Colors.red[50]!;
+    } else if (ratio <= 0.5) {
+      color = Colors.black;
+      bgColor = Colors.grey[200]!;
+    } else {
+      color = Colors.blue[900]!;
+      bgColor = Colors.blue[50]!;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '$remaining/$total 회',
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+      ),
     );
   }
 
@@ -279,7 +374,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.amber[100]!),
             ),
-            // 수정됨: const 키워드 제거 (Colors.amber[900] 때문)
             child: Row(
               children: [
                 Icon(LucideIcons.info, size: 16, color: Colors.amber[900]),

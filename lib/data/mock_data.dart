@@ -127,7 +127,7 @@ List<Schedule> mockSchedules = [
   Schedule(
     id: 's2',
     memberId: '2',
-    memberName: '이지은',
+    memberName: '이영희',
     date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
     startTime: '22:00',
     endTime: '23:00',
