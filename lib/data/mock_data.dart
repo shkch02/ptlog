@@ -1,6 +1,10 @@
 import '../models/index.dart';
 
+// ------------------------------------------------------------------------
+// Mock Members (총 50명)
+// ------------------------------------------------------------------------
 List<Member> mockMembers = [
+  // 1~10: 기존 데이터 (유지)
   Member(
     id: '1',
     name: '김민수',
@@ -10,7 +14,7 @@ List<Member> mockMembers = [
     totalSessions: 20,
     registrationDate: '2024-11-01',
     notes: '허리 디스크 주의, 데드리프트 중량 제한',
-    profileImage: null, // 이미지가 없으면 기본 이니셜 아바타가 뜸
+    profileImage: null,
   ),
   Member(
     id: '2',
@@ -64,7 +68,7 @@ List<Member> mockMembers = [
     remainingSessions: 5,
     totalSessions: 10,
     registrationDate: '2024-11-15',
-    notes: '',
+    notes: '주 2회 고정 (화, 목)',
     profileImage: null,
   ),
   Member(
@@ -111,14 +115,267 @@ List<Member> mockMembers = [
     notes: '다이어트 목적, 유산소 숙제 필수',
     profileImage: null,
   ),
+
+  // 11~20: 신규 등록 및 열정 회원 그룹
+  Member(
+    id: '11',
+    name: '배수지',
+    phone: '010-1004-1004',
+    email: 'suzy@example.com',
+    remainingSessions: 28,
+    totalSessions: 30,
+    registrationDate: '2025-01-02',
+    notes: '신규 등록, 기초 체력 증진 목표',
+    profileImage: null,
+  ),
+  Member(
+    id: '12',
+    name: '공유',
+    phone: '010-0000-1111',
+    email: 'gong@example.com',
+    remainingSessions: 9,
+    totalSessions: 10,
+    registrationDate: '2024-12-28',
+    notes: '등 운동 루틴 구성 요청',
+    profileImage: null,
+  ),
+  Member(
+    id: '13',
+    name: '이동욱',
+    phone: '010-0000-2222',
+    email: 'wook@example.com',
+    remainingSessions: 15,
+    totalSessions: 20,
+    registrationDate: '2024-11-20',
+    notes: '식단 사진 매일 전송하기로 함',
+    profileImage: null,
+  ),
+  Member(
+    id: '14',
+    name: '김고은',
+    phone: '010-0000-3333',
+    email: 'goeun@example.com',
+    remainingSessions: 4,
+    totalSessions: 20,
+    registrationDate: '2024-10-10',
+    notes: '재등록 고민 중, 가격 문의함',
+    profileImage: null,
+  ),
+  Member(
+    id: '15',
+    name: '박서준',
+    phone: '010-0000-4444',
+    email: 'seojun@example.com',
+    remainingSessions: 19,
+    totalSessions: 20,
+    registrationDate: '2024-12-15',
+    notes: '어깨 넓어지는 운동 위주',
+    profileImage: null,
+  ),
+  Member(
+    id: '16',
+    name: '아이유',
+    phone: '010-0000-5555',
+    email: 'iu@example.com',
+    remainingSessions: 25,
+    totalSessions: 50,
+    registrationDate: '2024-06-01',
+    notes: '장기 회원, 컨디션 체크 필수',
+    profileImage: null,
+  ),
+  Member(
+    id: '17',
+    name: '마동석',
+    phone: '010-0000-6666',
+    email: 'donlee@example.com',
+    remainingSessions: 3,
+    totalSessions: 10,
+    registrationDate: '2024-11-05',
+    notes: '중량 훈련 위주, 벤치프레스 100kg 도전',
+    profileImage: null,
+  ),
+  Member(
+    id: '18',
+    name: '손석구',
+    phone: '010-0000-7777',
+    email: 'gu@example.com',
+    remainingSessions: 12,
+    totalSessions: 20,
+    registrationDate: '2024-11-25',
+    notes: '야근이 잦음, 저녁 9시 이후 선호',
+    profileImage: null,
+  ),
+  Member(
+    id: '19',
+    name: '전지현',
+    phone: '010-0000-8888',
+    email: 'jihyun@example.com',
+    remainingSessions: 8,
+    totalSessions: 30,
+    registrationDate: '2024-09-01',
+    notes: '유연성 부족, 스트레칭 필수',
+    profileImage: null,
+  ),
+  Member(
+    id: '20',
+    name: '현빈',
+    phone: '010-0000-9999',
+    email: 'bin@example.com',
+    remainingSessions: 10,
+    totalSessions: 10,
+    registrationDate: '2024-12-29',
+    notes: '골프 비거리를 위한 코어 운동',
+    profileImage: null,
+  ),
+
+  // 21~30: 재활 및 특이사항 그룹
+  Member(
+    id: '21',
+    name: '김철수',
+    phone: '010-1111-0001',
+    email: 'chul@example.com',
+    remainingSessions: 22,
+    totalSessions: 30,
+    registrationDate: '2024-11-10',
+    notes: '오른쪽 발목 인대 부상 이력',
+    profileImage: null,
+  ),
+  Member(
+    id: '22',
+    name: '이영미',
+    phone: '010-1111-0002',
+    email: 'ym@example.com',
+    remainingSessions: 1,
+    totalSessions: 10,
+    registrationDate: '2024-10-15',
+    notes: '재등록 안 함 (이사 예정)',
+    profileImage: null,
+  ),
+  Member(
+    id: '23',
+    name: '박상훈',
+    phone: '010-1111-0003',
+    email: 'hoon@example.com',
+    remainingSessions: 5,
+    totalSessions: 20,
+    registrationDate: '2024-09-20',
+    notes: '거북목 교정 필요',
+    profileImage: null,
+  ),
+  Member(
+    id: '24',
+    name: '최지우',
+    phone: '010-1111-0004',
+    email: 'jiwoo@example.com',
+    remainingSessions: 45,
+    totalSessions: 50,
+    registrationDate: '2024-12-15',
+    notes: '바디프로필 반 4기',
+    profileImage: null,
+  ),
+  Member(
+    id: '25',
+    name: '정민호',
+    phone: '010-1111-0005',
+    email: 'minho@example.com',
+    remainingSessions: 11,
+    totalSessions: 20,
+    registrationDate: '2024-11-30',
+    notes: '식단 조절 어려워함',
+    profileImage: null,
+  ),
+  Member(
+    id: '26',
+    name: '강지영',
+    phone: '010-1111-0006',
+    email: 'jy@example.com',
+    remainingSessions: 2,
+    totalSessions: 20,
+    registrationDate: '2024-08-20',
+    notes: '출석률 저조, 연락 잘 안됨',
+    profileImage: null,
+  ),
+  Member(
+    id: '27',
+    name: '조성모',
+    phone: '010-1111-0007',
+    email: 'sungmo@example.com',
+    remainingSessions: 6,
+    totalSessions: 10,
+    registrationDate: '2024-12-05',
+    notes: '매실 음료 좋아함',
+    profileImage: null,
+  ),
+  Member(
+    id: '28',
+    name: '윤미래',
+    phone: '010-1111-0008',
+    email: 'mirae@example.com',
+    remainingSessions: 14,
+    totalSessions: 20,
+    registrationDate: '2024-11-11',
+    notes: '힙업 운동 집중 요청',
+    profileImage: null,
+  ),
+  Member(
+    id: '29',
+    name: '장기하',
+    phone: '010-1111-0009',
+    email: 'kiha@example.com',
+    remainingSessions: 30,
+    totalSessions: 30,
+    registrationDate: '2025-01-05',
+    notes: '신규 오리엔테이션 완료',
+    profileImage: null,
+  ),
+  Member(
+    id: '30',
+    name: '임재범',
+    phone: '010-1111-0010',
+    email: 'jaebum@example.com',
+    remainingSessions: 0,
+    totalSessions: 10,
+    registrationDate: '2024-09-01',
+    notes: '세션 종료 (재등록 보류)',
+    profileImage: null,
+  ),
+
+  // 31~40: 재등록 유도 필요 그룹 (남은 횟수 3회 이하)
+  Member(id: '31', name: '한예슬', phone: '010-2222-0001', email: 'ys@test.com', remainingSessions: 3, totalSessions: 20, registrationDate: '2024-10-01', notes: '재등록 긍정적', profileImage: null),
+  Member(id: '32', name: '오지호', phone: '010-2222-0002', email: 'jh@test.com', remainingSessions: 2, totalSessions: 10, registrationDate: '2024-11-01', notes: '이번 주 상담 일정 잡기', profileImage: null),
+  Member(id: '33', name: '서현진', phone: '010-2222-0003', email: 'hj@test.com', remainingSessions: 1, totalSessions: 30, registrationDate: '2024-07-01', notes: '장기 회원 할인 문의', profileImage: null),
+  Member(id: '34', name: '신동엽', phone: '010-2222-0004', email: 'dy@test.com', remainingSessions: 0, totalSessions: 20, registrationDate: '2024-09-10', notes: '연락 두절', profileImage: null),
+  Member(id: '35', name: '권상우', phone: '010-2222-0005', email: 'sw@test.com', remainingSessions: 3, totalSessions: 20, registrationDate: '2024-10-20', notes: '복근 운동 루틴 필요', profileImage: null),
+  Member(id: '36', name: '황정민', phone: '010-2222-0006', email: 'jm@test.com', remainingSessions: 2, totalSessions: 20, registrationDate: '2024-11-15', notes: '다음 달 출장 예정', profileImage: null),
+  Member(id: '37', name: '안성기', phone: '010-2222-0007', email: 'sk@test.com', remainingSessions: 1, totalSessions: 10, registrationDate: '2024-12-01', notes: '시니어 트레이닝', profileImage: null),
+  Member(id: '38', name: '송혜교', phone: '010-2222-0008', email: 'hk@test.com', remainingSessions: 3, totalSessions: 50, registrationDate: '2024-05-05', notes: '결혼 준비 중', profileImage: null),
+  Member(id: '39', name: '전도연', phone: '010-2222-0009', email: 'dy2@test.com', remainingSessions: 2, totalSessions: 20, registrationDate: '2024-10-10', notes: '체형 교정 목적', profileImage: null),
+  Member(id: '40', name: '홍길동', phone: '010-2222-0010', email: 'hkd@test.com', remainingSessions: 1, totalSessions: 10, registrationDate: '2024-12-10', notes: '테스트 계정', profileImage: null),
+
+  // 41~50: 일반 회원
+  Member(id: '41', name: '류승룡', phone: '010-3333-0001', email: 'ryu@test.com', remainingSessions: 15, totalSessions: 20, registrationDate: '2024-12-01', notes: '', profileImage: null),
+  Member(id: '42', name: '유해진', phone: '010-3333-0002', email: 'yoo@test.com', remainingSessions: 12, totalSessions: 20, registrationDate: '2024-11-20', notes: '등산 동호회', profileImage: null),
+  Member(id: '43', name: '차태현', phone: '010-3333-0003', email: 'cha@test.com', remainingSessions: 8, totalSessions: 10, registrationDate: '2025-01-01', notes: '', profileImage: null),
+  Member(id: '44', name: '김혜수', phone: '010-3333-0004', email: 'kim@test.com', remainingSessions: 25, totalSessions: 30, registrationDate: '2024-12-05', notes: '', profileImage: null),
+  Member(id: '45', name: '이병헌', phone: '010-3333-0005', email: 'lee@test.com', remainingSessions: 18, totalSessions: 20, registrationDate: '2024-11-25', notes: '', profileImage: null),
+  Member(id: '46', name: '하정우', phone: '010-3333-0006', email: 'ha@test.com', remainingSessions: 7, totalSessions: 10, registrationDate: '2024-12-15', notes: '걷기 운동 병행', profileImage: null),
+  Member(id: '47', name: '정우', phone: '010-3333-0007', email: 'jung@test.com', remainingSessions: 14, totalSessions: 20, registrationDate: '2024-11-30', notes: '', profileImage: null),
+  Member(id: '48', name: '박보영', phone: '010-3333-0008', email: 'park@test.com', remainingSessions: 29, totalSessions: 30, registrationDate: '2024-12-28', notes: '근력 증진', profileImage: null),
+  Member(id: '49', name: '조정석', phone: '010-3333-0009', email: 'cho@test.com', remainingSessions: 6, totalSessions: 10, registrationDate: '2024-12-10', notes: '', profileImage: null),
+  Member(id: '50', name: '김지원', phone: '010-3333-0010', email: 'jiwon@test.com', remainingSessions: 10, totalSessions: 10, registrationDate: '2025-01-07', notes: '오늘 등록함', profileImage: null),
 ];
 
+
+// ------------------------------------------------------------------------
+// Mock Schedules (오늘, 내일 일정 + 과거 일정)
+// ------------------------------------------------------------------------
 List<Schedule> mockSchedules = [
+  // 오늘 일정 (홈 화면 '곧 시작하는 수업' 테스트용)
   Schedule(
     id: 's1',
     memberId: '1',
     memberName: '김민수',
-    date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
+    date: DateTime.now().toString().split(' ')[0], // 오늘
     startTime: '21:00',
     endTime: '22:00',
     notes: '등 운동 위주',
@@ -128,12 +385,14 @@ List<Schedule> mockSchedules = [
     id: 's2',
     memberId: '2',
     memberName: '이영희',
-    date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
-    startTime: '20:00',
-    endTime: '21:00',
+    date: DateTime.now().toString().split(' ')[0], // 오늘
+    startTime: '02:00',
+    endTime: '03:00',
     notes: '하체 비만 관리',
     reminder: '1시간 전 알림',
   ),
+  
+  // 내일 일정
   Schedule(
     id: 's3',
     memberId: '1',
@@ -144,12 +403,20 @@ List<Schedule> mockSchedules = [
     notes: '가슴 운동',
     reminder: '10분 전 알림',
   ),
+  
+  // 기타 일정 (데이터 구색 맞추기)
+  Schedule(id: 's4', memberId: '11', memberName: '배수지', date: '2025-01-10', startTime: '14:00', endTime: '15:00', notes: 'OT 진행', reminder: '1일 전'),
+  Schedule(id: 's5', memberId: '16', memberName: '아이유', date: '2025-01-11', startTime: '18:00', endTime: '19:00', notes: '컨디션 체크', reminder: '1시간 전'),
 ];
 
 
+// ------------------------------------------------------------------------
+// Mock Payment Logs
+// ------------------------------------------------------------------------
 List<PaymentLog> mockPaymentLogs = [
   PaymentLog(id: 'p1', memberId: '1', date: '2024-12-01', type: 'PT결제', content: 'PT 20회 재등록', amount: '1,200,000원'),
   PaymentLog(id: 'p2', memberId: '1', date: '2024-11-15', type: 'CRM연동', content: '입장 기록 연동', amount: '-'),
   PaymentLog(id: 'p3', memberId: '2', date: '2024-12-10', type: '회원권', content: '3개월 연장', amount: '270,000원'),
+  PaymentLog(id: 'p4', memberId: '11', date: '2025-01-02', type: 'PT결제', content: 'PT 30회 신규', amount: '1,500,000원'),
+  PaymentLog(id: 'p5', memberId: '16', date: '2024-06-01', type: 'PT결제', content: 'PT 50회 신규', amount: '2,500,000원'),
 ];
-
