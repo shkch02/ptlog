@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/index.dart';
+import '../data/mock_data.dart'; // 전체 스케줄(mockSchedules) 접근을 위해 필요
+import 'member_detail_dialog.dart';
+import '../screens/session_log_screen.dart';
 
 class UpcomingSessionSection extends StatelessWidget {
   final List<Schedule> schedules;
@@ -12,14 +15,48 @@ class UpcomingSessionSection extends StatelessWidget {
     required this.onManualStart,
   });
 
-  // 헤더 멘트 생성 로직
+  // 헤더 멘트 생성 로직 (수정됨)
   String _getDynamicHeaderText() {
     final now = DateTime.now();
-    final nextHour = now.hour + 1 > 24 ? 1 : now.hour + 1;
 
+    // 1. 현재 타임에 전달된 스케줄이 없는 경우 (빈 화면 or 수동 카드 상태)
     if (schedules.isEmpty) {
-      return '$nextHour시에는 수업이 없어요 💤';
-    } else {
+      // 오늘 날짜 문자열 (yyyy-MM-dd)
+      final todayStr = now.toString().split(' ')[0];
+
+      // 전체 스케줄(mockSchedules)에서 '오늘' & '현재 시간 이후'인 수업 필터링
+      final futureSchedules = mockSchedules.where((s) {
+        // 날짜가 오늘이 아니면 제외
+        if (s.date != todayStr) return false;
+
+        // 시간 파싱 및 비교
+        try {
+          final timeParts = s.startTime.split(':');
+          final h = int.parse(timeParts[0]);
+          final m = int.parse(timeParts[1]);
+          final scheduleDate = DateTime(now.year, now.month, now.day, h, m);
+          
+          return scheduleDate.isAfter(now); // 현재 시간보다 이후인지 확인
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+
+      if (futureSchedules.isNotEmpty) {
+        // 시간순 정렬 (가장 가까운 수업 찾기)
+        futureSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
+        
+        final nextSchedule = futureSchedules.first;
+        final hour = int.parse(nextSchedule.startTime.split(':')[0]);
+        
+        return '$hour시에 수업이 있어요 ⏳'; // 요청하신 멘트
+      } else {
+        // 오늘 남은 수업이 아예 없는 경우
+        return '오늘 남은 수업이 없어요 🌙';
+      }
+    } 
+    // 2. 현재 타임에 스케줄이 있는 경우 (기존 로직 유지)
+    else {
       final firstSchedule = schedules.first;
       final timeParts = firstSchedule.startTime.split(':');
       final scheduleHour = int.parse(timeParts[0]);
@@ -49,7 +86,7 @@ class UpcomingSessionSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // 2. 데이터 유무에 따른 카드 표시
+        // 2. 데이터 유무에 따른 카드 표시 (그대로 유지)
         if (schedules.isEmpty)
           _buildManualStartCard()
         else
@@ -125,7 +162,7 @@ class UpcomingSessionSection extends StatelessWidget {
     );
   }
 
-  // 3. 예약된 세션 카드 (수정됨)
+  // 3. 예약된 세션 카드
   Widget _buildSessionCard(BuildContext context, Schedule schedule) {
     return Container(
       width: double.infinity,
@@ -150,12 +187,12 @@ class UpcomingSessionSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 상단: 시간 및 예약 변경 버튼 (기존 ... 위치로 이동)
+            // 상단: 시간 및 예약 변경 버튼
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -171,7 +208,7 @@ class UpcomingSessionSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                // 예약 변경 버튼 (우측 상단으로 이동됨)
+                // 예약 수정 버튼
                 InkWell(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -180,19 +217,30 @@ class UpcomingSessionSection extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
                     ),
-                    child: const Icon(LucideIcons.calendarSearch, color: Colors.white70, size: 20),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(LucideIcons.calendarSearch, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text(
+                          '예약 수정',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             
-            // 중단: 회원 정보 및 정보 확인 버튼
+            // 중단: 회원 정보
             Row(
               children: [
                 CircleAvatar(
@@ -201,7 +249,6 @@ class UpcomingSessionSection extends StatelessWidget {
                   child: Text(schedule.memberName[0], style: TextStyle(color: Colors.blue[800], fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 16),
-                // 이름과 특이사항
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,13 +266,20 @@ class UpcomingSessionSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                // 회원 정보 확인 버튼 (오른쪽 정렬)
                 const SizedBox(width: 8),
                 InkWell(
                   onTap: () {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('회원 상세 정보를 확인합니다.')),
-                    );
+                    try {
+                      final member = mockMembers.firstWhere((m) => m.id == schedule.memberId);
+                      showDialog(
+                        context: context,
+                        builder: (context) => MemberDetailDialog(member: member),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('회원 정보를 찾을 수 없습니다.')),
+                      );
+                    }
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
@@ -237,7 +291,7 @@ class UpcomingSessionSection extends StatelessWidget {
                     ),
                     child: Row(
                       children: const [
-                        Icon(LucideIcons.clipboardList, color: Colors.white, size: 18), // 보고서/일지 아이콘
+                        Icon(LucideIcons.clipboardList, color: Colors.white, size: 18),
                         SizedBox(width: 6),
                         Text(
                           "정보",
@@ -251,13 +305,16 @@ class UpcomingSessionSection extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 하단: 세션 시작 버튼 (기존 큰 버튼 형태로 복구)
+            // 하단: 세션 시작 버튼
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('세션을 시작합니다! 운동 일지로 이동합니다.')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SessionLogScreen(schedule: schedule),
+                    ),
                   );
                 },
                 icon: const Icon(LucideIcons.play, size: 20, color: Colors.blue),

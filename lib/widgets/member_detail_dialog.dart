@@ -202,13 +202,13 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                 ),
               ),
               
-              // 보고서 버튼
+              // 운동기록 버튼
               OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('보고서 기능 준비중')));
                 },
                 icon: Icon(LucideIcons.fileText, size: 14, color: isPast ? Colors.grey[600] : Colors.blue),
-                label: Text('보고서', style: TextStyle(fontSize: 12, color: isPast ? Colors.grey[600] : Colors.blue)),
+                label: Text('운동기록', style: TextStyle(fontSize: 12, color: isPast ? Colors.grey[600] : Colors.blue)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                   minimumSize: const Size(0, 32),

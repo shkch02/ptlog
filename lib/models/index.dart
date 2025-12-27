@@ -94,7 +94,6 @@ class WorkoutLog {
   });
 }
 
-// lib/models/index.dart 파일 맨 아래에 추가
 
 class PaymentLog {
   final String id;
