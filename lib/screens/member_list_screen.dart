@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../data/mock_data.dart'; // 더미 데이터 import
 import '../models/index.dart'; // 모델 import
 
-class MemberListScreen extends StatefulWidget {
+class MemberListScreen extends StatefulWidget { //검색 기능 구현위해 statefulwidget 사용
   const MemberListScreen({super.key});
 
   @override
@@ -13,10 +13,10 @@ class MemberListScreen extends StatefulWidget {
 class _MemberListScreenState extends State<MemberListScreen> {
   // 실제로는 상위 상태관리에서 받아와야 하지만, 데모를 위해 로컬 state 사용
   List<Member> members = mockMembers; 
-  String searchQuery = '';
+  String searchQuery = '';//사용자가 검색창에 입력한 값 저장하는 변수
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { //build : 화면이 갱신 될 때마다 호출되는 함수
     // 검색 필터링
     final filteredMembers = members.where((member) =>
       member.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
@@ -29,8 +29,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
       child: Column(
         children: [
           // Header & Add Button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(//헤더
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,//양쪽 끝 정렬
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +50,7 @@ class _MemberListScreenState extends State<MemberListScreen> {
           ),
           const SizedBox(height: 16),
           
-          // Search Bar
+          // 검색 바
           TextField(
             onChanged: (value) => setState(() => searchQuery = value),
             decoration: InputDecoration(
@@ -71,8 +71,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Member List
-          Expanded(
+          // 회원 목록
+          Expanded(//남은 공간은 전부 회원 목록
             child: ListView.builder(
               itemCount: filteredMembers.length,
               itemBuilder: (context, index) {
