@@ -17,6 +17,64 @@ class _HomeScreenState extends State<HomeScreen> {
   // 현재 시간 (데모용)
   final DateTime now = DateTime.now();
 
+  // ------------------------------------------------------------------------
+  // 기능: 수동 수업 시작 다이얼로그 (회원 선택 -> 시작)
+  // ------------------------------------------------------------------------
+  void _showManualSessionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('수동 수업 시작'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('수업을 진행할 회원을 선택해주세요.', style: TextStyle(fontSize: 13, color: Colors.grey)),
+              const SizedBox(height: 16),
+              // 간단한 회원 리스트 (실제로는 검색 기능이 있으면 좋음)
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: mockMembers.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final member = mockMembers[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        radius: 16,
+                        backgroundImage: NetworkImage(member.profileImage ?? ''),
+                        onBackgroundImageError: (_, __) {},
+                        child: member.profileImage == null ? Text(member.name[0]) : null,
+                      ),
+                      title: Text(member.name),
+                      trailing: const Icon(LucideIcons.chevronRight, size: 16),
+                      onTap: () {
+                        Navigator.pop(context); // 팝업 닫기
+                        // TODO: 여기서 선택된 회원(member) 정보를 가지고 운동 일지 작성 화면으로 이동
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${member.name} 회원님과 수동 수업을 시작합니다.')),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 1. 임박한 세션 필터링 로직 (오늘 날짜 + 현재 시간 ~ 2시간 뒤)
@@ -38,12 +96,17 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상단: 곧 시작하는 세션
+          // 상단 제목
           const Text('곧 시작하는 수업 🔥', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           
+          // ---------------------------------------------------------------
+          // 상황별 카드 표시
+          // 1. 예약된 수업이 없을 때 -> 수동 시작 카드 (요청하신 기능)
+          // 2. 예약된 수업이 있을 때 -> 해당 수업 정보 카드
+          // ---------------------------------------------------------------
           if (upcomingSchedules.isEmpty)
-            _buildEmptyStateCard()
+            _buildManualStartCard() // 여기가 변경된 부분입니다.
           else
             ...upcomingSchedules.map((schedule) => _buildSessionCard(schedule)),
 
@@ -108,29 +171,85 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyStateCard() {
+  // ------------------------------------------------------------------------
+  // 위젯: 수동 수업 시작 카드 (예약 없을 때 표시)
+  // ------------------------------------------------------------------------
+  Widget _buildManualStartCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.blue[100]!), // 옅은 파란 테두리
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          )
+        ],
       ),
       child: Column(
         children: [
-          const Icon(LucideIcons.coffee, size: 48, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text('2시간 이내 예정된 수업이 없습니다.', style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: widget.onGoToSchedule, 
-            child: const Text('전체 스케줄 확인'),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(LucideIcons.dumbbell, size: 24, color: Colors.orange[800]),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '예약된 수업이 없나요?', 
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '타 매체 예약이나 신규 회원을 위해\n바로 운동 일지를 시작할 수 있어요.', 
+                      style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _showManualSessionDialog, // 회원 선택 팝업 호출
+              icon: const Icon(LucideIcons.plus, size: 18, color: Colors.white),
+              label: const Text('수동으로 수업 시작하기', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo, // 강조색 (남색)
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // 기존의 스케줄 확인 버튼은 보조 버튼으로 유지
+          TextButton(
+            onPressed: widget.onGoToSchedule,
+            child: const Text('전체 스케줄 확인하러 가기', style: TextStyle(color: Colors.grey, fontSize: 12)),
           ),
         ],
       ),
     );
   }
 
+  // ------------------------------------------------------------------------
+  // 위젯: 예약된 세션 카드 (기존 유지)
+  // ------------------------------------------------------------------------
   Widget _buildSessionCard(Schedule schedule) {
     return Container(
       width: double.infinity,
@@ -206,7 +325,11 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('세션을 시작합니다! 운동 일지로 이동합니다.')),
+                  );
+                },
                 icon: const Icon(LucideIcons.play, size: 18, color: Colors.blue),
                 label: const Text('세션 시작하기', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(

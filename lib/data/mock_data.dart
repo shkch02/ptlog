@@ -119,8 +119,8 @@ List<Schedule> mockSchedules = [
     memberId: '1',
     memberName: '김민수',
     date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
-    startTime: '19:00',
-    endTime: '20:00',
+    startTime: '21:00',
+    endTime: '22:00',
     notes: '등 운동 위주',
     reminder: '10분 전 알림',
   ),
@@ -129,8 +129,8 @@ List<Schedule> mockSchedules = [
     memberId: '2',
     memberName: '이지은',
     date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
-    startTime: '18:00',
-    endTime: '19:00',
+    startTime: '22:00',
+    endTime: '23:00',
     notes: '하체 비만 관리',
     reminder: '1시간 전 알림',
   ),
