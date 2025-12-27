@@ -129,8 +129,8 @@ List<Schedule> mockSchedules = [
     memberId: '2',
     memberName: '이영희',
     date: DateTime.now().toString().split(' ')[0], // 오늘 날짜
-    startTime: '22:00',
-    endTime: '23:00',
+    startTime: '20:00',
+    endTime: '21:00',
     notes: '하체 비만 관리',
     reminder: '1시간 전 알림',
   ),
