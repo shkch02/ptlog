@@ -3,7 +3,7 @@ import 'screens/login_screen.dart';
 import 'screens/layout_screen.dart';
 
 void main() {
-  runApp(const PtTrainerApp());
+  runApp(const PtTrainerApp()); //앱 진입점
 }
 
 class PtTrainerApp extends StatelessWidget {
@@ -30,11 +30,11 @@ class AppContainer extends StatefulWidget {
 }
 
 class _AppContainerState extends State<AppContainer> {
-  bool isLoggedIn = false;
+  bool isLoggedIn = false; //로그인 상태 관리
 
   void _login() {
-    setState(() {
-      isLoggedIn = true;
+    setState(() {//로그인 상태 변경
+      isLoggedIn = true; // 지금은 그냥 로그인 버튼 누르기만 하면 true로 로그인 처리
     });
   }
 
@@ -47,9 +47,10 @@ class _AppContainerState extends State<AppContainer> {
   @override
   Widget build(BuildContext context) {
     // React의 조건부 렌더링과 동일
-    if (!isLoggedIn) {
+    if (!isLoggedIn) {//로그인 안되어있으면 loginScreen 보여줌
       return LoginScreen(onLogin: _login);
     }
+    //로그인 되어있으면 LayoutScreen 보여줌
     return LayoutScreen(onLogout: _logout);
   }
 }
