@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../models/index.dart';
 import '../screens/session_log_screen.dart';
 
+//콜백함수 정의
 typedef OnMemberInfoTap = void Function(String memberId);
 
 class UpcomingSessionSection extends StatelessWidget {
@@ -21,57 +22,51 @@ class UpcomingSessionSection extends StatelessWidget {
 
   // 헤더 멘트 생성 로직 (수정됨)
   String _getDynamicHeaderText() {
-
+    // 1. 카드로 보여줄 스케줄이 없는 경우 (조건 3, 4)
     if (schedules.isEmpty) {
-      return emptyMessage ?? '오늘 남은 수업이 없어요';
+      // Repository에서 계산해준 메시지를 그대로 출력
+      return emptyMessage ?? '오늘은 예약된 세션이 없습니다';
     }
 
+    // 2. 카드가 있는 경우 (조건 1, 2)
+    // 여기는 "현재 진행 중"인지 "곧 시작"인지만 판단해서 멘트 출력
     final now = DateTime.now();
     final firstSchedule = schedules.first;
-
-    // 1. 현재 타임에 전달된 스케줄이 없는 경우 (빈 화면 or 수동 카드 상태)
+    
     try {
       final timeParts = firstSchedule.startTime.split(':');
-      final scheduleHour = int.parse(timeParts[0]);
-      final scheduleMinute = int.parse(timeParts[1]);
-      
-      // 날짜까지 고려한 시간 비교
-      final scheduleTime = DateTime(now.year, now.month, now.day, scheduleHour, scheduleMinute);
+      final scheduleTime = DateTime(now.year, now.month, now.day, int.parse(timeParts[0]), int.parse(timeParts[1]));
       final diffMinutes = scheduleTime.difference(now).inMinutes;
 
-      if (diffMinutes > 0 && diffMinutes < 60) {
-        return '$diffMinutes분 뒤에 수업이 있어요! ⏰';
-      } else if (diffMinutes <= 0 && diffMinutes > -60) { // 수업 중
-        return '수업 시작 시간이에요! 🔥';
+      if (diffMinutes <= 0 && diffMinutes > -60) {
+        return '수업 시작 시간이에요! 🔥'; // 현재 수업
       } else {
-        return '오늘 예정된 수업이 있어요 💪';
+        return '${diffMinutes}분 뒤에 수업이 있어요! ⏰'; // 다음 정각 수업
       }
     } catch (e) {
       return '오늘 예정된 수업이 있어요 💪';
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. 동적 헤더 멘트
         Text(
           _getDynamicHeaderText(), 
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
 
-        // 2. 데이터 유무에 따른 카드 표시 (그대로 유지)
         if (schedules.isEmpty)
-          _buildManualStartCard()
+          _buildManualStartCard() // 멘트(gap or empty) + 수동 버튼
         else
-          ...schedules.take(1).map((schedule)   => _buildSessionCard(context, schedule)),
+          // [중요] Repository에서 이미 1개만 걸러서 주므로 take(1) 안 해도 되지만 안전상 유지
+          ...schedules.take(1).map((schedule) => _buildSessionCard(context, schedule)),
       ],
     );
   }
-
   Widget _buildManualStartCard() {
     return Container(
       width: double.infinity,
