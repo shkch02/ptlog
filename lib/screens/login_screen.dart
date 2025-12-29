@@ -1,87 +1,144 @@
 import 'package:flutter/material.dart';
+import '../repositories/auth_repository.dart';
+import 'layout_screen.dart'; // 로그인 성공 시 이동할 화면 import
 
-class LoginScreen extends StatelessWidget {
-  final VoidCallback onLogin;
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
-  const LoginScreen({super.key, required this.onLogin});//생성자, 이 로그인화면 생성시 onLogin 콜백 필요(main.dart에서 _login을 받아 onlogin에 연결)
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
-  //화면 그리기 시작
+class _LoginScreenState extends State<LoginScreen> {
+  // 1. 리포지토리 인스턴스 생성 (이제 여기서 직접 씁니다!)
+  final AuthRepository _authRepo = AuthRepository();
+  
+  // 2. 로딩 상태 관리 변수
+  bool _isLoading = false;
+
+  // 3. 로그인 처리 함수
+  void _handleLogin() async {
+    // 로딩 시작 (화면 갱신)
+    setState(() {
+      _isLoading = true;
+    });
+
+    // 실제 로그인 요청 (지금은 더미지만 나중에 진짜 서버 통신됨)
+    // 소셜 로그인 버튼이므로 ID/PW는 임시값 혹은 토큰 방식 사용 예정
+    final isSuccess = await _authRepo.login('test', '1234'); 
+
+    // 화면이 살아있는지 확인 후 로딩 종료
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (isSuccess) {
+        // 4. 성공 시 화면 이동 (Main -> LayoutScreen)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LayoutScreen(
+            // 로그아웃 시 다시 로그인 화면으로 이동하는 로직을 전달합니다.
+              onLogout: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+            ),
+          ),
+        );
+      } else {
+        // 실패 시 에러 메시지
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('로그인에 실패했습니다.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container( //전체 화면 컨테이너
-        decoration: BoxDecoration( //배경 장식
-          gradient: LinearGradient( //배경 그라데이션
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue[50]!, Colors.indigo[100]!], //배경 그라데이션 색 지정
+            colors: [Colors.blue[50]!, Colors.indigo[100]!],
           ),
         ),
-        child: Center( //화면 중앙에 넣을 위젯
-          child: Card( // Card : 입체감이 있는 하얀 박스
-            margin: const EdgeInsets.symmetric(horizontal: 24), //좌우 여백 설정, 24
-            elevation: 4, //그림자 효과, 깊이는 4
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), //모서리 둥글게
-            child: Padding( // 박스 안쪽 버튼들을 위한 여백 설정
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, //컬럼 높이를 자식 위젯에 맞춤,없으면 카드가 위아래로 꽉 참
-                children: [
-                  Container( // 앱 로고 
-                    width: 64,
-                    height: 64,
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
+        child: Center(
+          // 로딩 중이면 뺑뺑이, 아니면 카드 보여주기
+          child: _isLoading 
+              ? const CircularProgressIndicator() 
+              : Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.fitness_center, color: Colors.white, size: 32),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '피티로그',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text('회원 관리 시스템', style: TextStyle(color: Colors.grey)),
+                        const SizedBox(height: 32),
+                        
+                        // 카카오 로그인 버튼
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.chat_bubble, color: Colors.black87, size: 20),
+                            label: const Text('카카오 로그인', style: TextStyle(color: Colors.black87)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFFE812),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            // [수정] onLogin 대신 내부 함수 연결
+                            onPressed: _handleLogin, 
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        
+                        // 구글 로그인 버튼
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.g_mobiledata, color: Colors.black87, size: 20),
+                            label: const Text('구글 로그인', style: TextStyle(color: Colors.black87)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            // [수정] onLogin 대신 내부 함수 연결
+                            onPressed: _handleLogin,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text('※ 데모 버전입니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const Text('실제 로그인 기능은 백엔드 연동이 필요합니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
                     ),
-                    child: const Icon(Icons.fitness_center, color: Colors.white, size: 32),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    '피티로그',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('회원 관리 시스템', style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 32),
-                  
-                  // 카카오 로그인 버튼 (스타일 모방)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.chat_bubble, color: Colors.black87, size: 20),
-                      label: const Text('카카오 로그인', style: TextStyle(color: Colors.black87)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFE812),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: onLogin, // 버튼 누르면 onLogin 콜백 함수 실행
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // 구글 로그인 버튼 (카카오 버튼 스타일과 통일)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.g_mobiledata, color: Colors.black87, size: 20),
-                      label: const Text('구글 로그인', style: TextStyle(color: Colors.black87)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: onLogin,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text('※ 데모 버전입니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  const Text('실제 로그인 기능은 백엔드 연동이 필요합니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
-              ),
-            ),
-          ),
+                ),
         ),
       ),
     );
