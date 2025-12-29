@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷팅 초기화용 (필요시)
 import 'screens/login_screen.dart';
-import 'screens/layout_screen.dart';
 
-void main() {
-  runApp(const PtTrainerApp()); //앱 진입점
+void main() async {
+  // 날짜 포맷팅 등 비동기 초기화가 필요할 때를 대비해 미리 바인딩
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null);
+  
+  runApp(const PtTrainerApp());
 }
 
 class PtTrainerApp extends StatelessWidget {
@@ -13,44 +17,15 @@ class PtTrainerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PT Trainer',
+      debugShowCheckedModeBanner: false, // 디버그 띠 제거
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), // Tailwind 색상 대체
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        scaffoldBackgroundColor: Colors.grey[50], // 앱 전체 배경색 설정
+        fontFamily: 'Pretendard', // (만약 폰트 적용했다면)
       ),
-      home: const AppContainer(),
+      // [수정] AppContainer 없이 바로 로그인 화면으로 시작!
+      home: const LoginScreen(), 
     );
-  }
-}
-
-class AppContainer extends StatefulWidget {
-  const AppContainer({super.key});
-
-  @override
-  State<AppContainer> createState() => _AppContainerState();
-}
-
-class _AppContainerState extends State<AppContainer> {
-  bool isLoggedIn = false; //로그인 상태 관리
-
-  void _login() {
-    setState(() {//로그인 상태 변경
-      isLoggedIn = true; // 지금은 그냥 로그인 버튼 누르기만 하면 true로 로그인 처리
-    });
-  }
-
-  void _logout() {
-    setState(() {
-      isLoggedIn = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // React의 조건부 렌더링과 동일
-    if (!isLoggedIn) {//로그인 안되어있으면 loginScreen 보여줌
-      return LoginScreen(onLogin: _login);
-    }
-    //로그인 되어있으면 LayoutScreen 보여줌
-    return LayoutScreen(onLogout: _logout);
   }
 }
