@@ -94,4 +94,17 @@ class ScheduleRepository {
     
     return memberSchedules;
   }
+
+  Future<List<Schedule>> getWeeklySchedules(DateTime startDay, DateTime endDay) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // 날짜 문자열 변환
+    final startStr = startDay.toString().split(' ')[0];
+    final endStr = endDay.toString().split(' ')[0];
+
+    return mockSchedules.where((s) {
+      // 문자열 비교 (yyyy-MM-dd는 사전순 비교 가능)
+      return s.date.compareTo(startStr) >= 0 && s.date.compareTo(endStr) <= 0;
+    }).toList();
+  }
 }
