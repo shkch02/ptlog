@@ -66,7 +66,7 @@ class _RenewalNeededSectionState extends State<RenewalNeededSection> {
                       padding: const EdgeInsets.only(left: 6.0),
                       child: Chip(
                         label: Text(
-                          '$count회 ${people}명', 
+                          '$count회 $people명', 
                           style: TextStyle(
                             fontSize: 12, 
                             fontWeight: FontWeight.bold,

@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _scheduleRepo.getUpcomingSchedules(),
       _memberRepo.getRenewalNeededMembers(),
       _memberRepo.getAllMembers(),
-      _scheduleRepo.getNextSessionTime(),
+      _scheduleRepo.getNextSessionHint(),
     ]);
 
     if (mounted) {

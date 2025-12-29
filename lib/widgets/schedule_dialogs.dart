@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../data/mock_data.dart';
+//import '../data/mock_data.dart';
 import '../models/index.dart';
+import '../repositories/schedule_repository.dart';
 
 // ------------------------------------------------------------------------
 // 1. 월간 달력 다이얼로그
@@ -59,7 +59,7 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Colors.blue.withAlpha(77), // withOpacity(0.3)
                   shape: BoxShape.circle,
                 ),
               ),
@@ -83,20 +83,47 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
   }
 }
 
-// ------------------------------------------------------------------------
 // 2. 주간 시간표 다이얼로그
-// ------------------------------------------------------------------------
-class WeeklyTimetableDialog extends StatelessWidget {
+class WeeklyTimetableDialog extends StatefulWidget {
   final DateTime selectedDate;
 
   const WeeklyTimetableDialog({super.key, required this.selectedDate});
 
   @override
-  Widget build(BuildContext context) {
+  State<WeeklyTimetableDialog> createState() => _WeeklyTimetableDialogState();
+}
+
+class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
+  final ScheduleRepository _scheduleRepo = ScheduleRepository();
+  List<Schedule> _weeklySchedules = [];
+  bool _isLoading = true;
+
+  late DateTime _sunday;
+
+  @override
+  void initState() {
+    super.initState();
     // 선택된 날짜가 속한 주의 일요일 구하기
-    final sunday = selectedDate.subtract(Duration(days: selectedDate.weekday % 7));
+    _sunday = widget.selectedDate.subtract(Duration(days: widget.selectedDate.weekday % 7));
+    _fetchWeeklyData();
+  }
+
+  Future<void> _fetchWeeklyData() async {
+    final saturday = _sunday.add(const Duration(days: 6));
     
-    // 표시할 시간 범위
+    // Repository를 통해 데이터 가져오기
+    final schedules = await _scheduleRepo.getWeeklySchedules(_sunday, saturday);
+
+    if (mounted) {
+      setState(() {
+        _weeklySchedules = schedules;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     const startHour = 9;
     const endHour = 22;
 
@@ -119,108 +146,113 @@ class WeeklyTimetableDialog extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             
-            // 요일 헤더
-            Row(
-              children: [
-                const SizedBox(width: 40),
-                ...List.generate(7, (index) {
-                  final day = sunday.add(Duration(days: index));
-                  final isToday = isSameDay(day, DateTime.now());
-                  return Expanded(
-                    child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isToday ? Colors.blue[50] : null,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(DateFormat('E', 'ko_KR').format(day), 
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: index == 0 ? Colors.red : Colors.black)),
-                          Text(DateFormat('dd').format(day), 
-                            style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-            const Divider(height: 1),
-
-            // 시간표 바디
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: List.generate(endHour - startHour + 1, (hourIndex) {
-                    final currentHour = startHour + hourIndex;
-                    
-                    return Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
-                      ),
-                      child: Row(
-                        children: [
-                          // 시간
-                          SizedBox(
-                            width: 40,
-                            child: Text(
-                              '$currentHour:00',
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          // 셀
-                          ...List.generate(7, (dayIndex) {
-                            final cellDate = sunday.add(Duration(days: dayIndex));
-                            final cellDateStr = DateFormat('yyyy-MM-dd').format(cellDate);
-                            
-                            // 데이터 매칭
-                            final schedule = mockSchedules.firstWhere(
-                              (s) {
-                                final sHour = int.tryParse(s.startTime.split(':')[0]) ?? -1;
-                                return s.date == cellDateStr && sHour == currentHour;
-                              },
-                              orElse: () => Schedule(id: '', memberId: '', memberName: '', date: '', startTime: '', endTime: '', notes: '', reminder: ''),
-                            );
-
-                            final hasSchedule = schedule.id.isNotEmpty;
-
-                            return Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(1),
-                                decoration: BoxDecoration(
-                                  color: hasSchedule ? Colors.blue[100] : null,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: hasSchedule
-                                    ? Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            schedule.memberName,
-                                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          Text(
-                                            schedule.startTime,
-                                            style: const TextStyle(fontSize: 9),
-                                          ),
-                                        ],
-                                      )
-                                    : null,
-                              ),
-                            );
-                          }),
-                        ],
+            // 로딩 중일 때 표시
+            if (_isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else ...[
+              // 요일 헤더
+              Row(
+                children: [
+                  const SizedBox(width: 40),
+                  ...List.generate(7, (index) {
+                    final day = _sunday.add(Duration(days: index));
+                    final isToday = isSameDay(day, DateTime.now());
+                    return Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isToday ? Colors.blue[50] : null,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(DateFormat('E', 'ko_KR').format(day), 
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: index == 0 ? Colors.red : Colors.black)),
+                            Text(DateFormat('dd').format(day), 
+                              style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                          ],
+                        ),
                       ),
                     );
                   }),
+                ],
+              ),
+              const Divider(height: 1),
+
+              // 시간표 바디
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(endHour - startHour + 1, (hourIndex) {
+                      final currentHour = startHour + hourIndex;
+                      
+                      return Container(
+                        height: 60,
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                        ),
+                        child: Row(
+                          children: [
+                            // 시간
+                            SizedBox(
+                              width: 40,
+                              child: Text(
+                                '$currentHour:00',
+                                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            // 셀
+                            ...List.generate(7, (dayIndex) {
+                              final cellDate = _sunday.add(Duration(days: dayIndex));
+                              final cellDateStr = DateFormat('yyyy-MM-dd').format(cellDate);
+                              
+                              // [수정] _weeklySchedules 리스트에서 매칭 (mock 데이터 직접 접근 X)
+                              final schedule = _weeklySchedules.firstWhere(
+                                (s) {
+                                  final sHour = int.tryParse(s.startTime.split(':')[0]) ?? -1;
+                                  return s.date == cellDateStr && sHour == currentHour;
+                                },
+                                orElse: () => Schedule(id: '', memberId: '', memberName: '', date: '', startTime: '', endTime: '', notes: '', reminder: ''),
+                              );
+
+                              final hasSchedule = schedule.id.isNotEmpty;
+
+                              return Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.all(1),
+                                  decoration: BoxDecoration(
+                                    color: hasSchedule ? Colors.blue[100] : null,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: hasSchedule
+                                      ? Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              schedule.memberName,
+                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              schedule.startTime,
+                                              style: const TextStyle(fontSize: 9),
+                                            ),
+                                          ],
+                                        )
+                                      : null,
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../data/mock_data.dart'; // [중요] Dialog 내부에서 아직 mock 데이터를 쓰므로 주석 해제
 import '../repositories/member_repository.dart';
 import '../models/index.dart'; 
 import '../widgets/member_detail_dialog.dart';

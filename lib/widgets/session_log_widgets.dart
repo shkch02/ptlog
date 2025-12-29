@@ -77,7 +77,7 @@ class ExerciseCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))
+          BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 8, offset: const Offset(0, 4)) // withOpacity(0.03)
         ],
       ),
       child: Column(
@@ -153,7 +153,7 @@ class ExerciseCard extends StatelessWidget {
               onRemove: () => onRemoveSet(entry.key),
               showRemoveButton: exercise.sets.length > 1,
             );
-          }).toList(),
+          }),
 
           // 세트 추가 버튼
           InkWell(
