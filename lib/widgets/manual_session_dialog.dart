@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
 import '../models/index.dart'; // Member 모델 import
 
 class ManualSessionDialog extends StatefulWidget {
   final List<Member> members; 
+  final Function(Schedule) onStart; //부모(home_screen)에게 전달할 콜백 함수
 
-  const ManualSessionDialog({super.key, required this.members});
+  const ManualSessionDialog({
+    super.key,
+    required this.members,
+    required this.onStart,
+  });
 
   @override
   State<ManualSessionDialog> createState() => _ManualSessionDialogState();
@@ -14,6 +20,21 @@ class ManualSessionDialog extends StatefulWidget {
 class _ManualSessionDialogState extends State<ManualSessionDialog> {
   // 검색어 상태 관리
   String _searchQuery = '';
+
+  Schedule _createSchedule(String memberName, {String? memberId, String notes = ''}) {
+    final now = DateTime.now();
+    return Schedule(
+      id: DateTime.now().millisecondsSinceEpoch.toString(), // 임시 ID 생성
+      memberId: memberId ?? 'guest',
+      memberName: memberName,
+      date: DateFormat('yyyy-MM-dd').format(now),
+      startTime: DateFormat('HH:mm').format(now),
+      endTime: DateFormat('HH:mm').format(now.add(const Duration(minutes: 50))),
+      //status: '진행중',
+      notes: notes,
+      reminder: '리마인더',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +77,28 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
 
             // 2. 신규/체험 회원 세션 시작 버튼
             InkWell(
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 체험 회원용 운동 일지 작성 페이지로 이동 (이름 없이 시작하거나 임시 이름 부여)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('신규/체험 회원님과 수업을 시작합니다.')),
+              onTap: () async {
+                final result = await showDialog<Map<String, String>>(
+                  context: context,
+                  builder: (context) => const _NewMemberInputDialog(),
                 );
+
+                if(result != null && mounted) {
+                  Navigator.pop(context); // 기존 다이얼로그 닫기
+
+                  final name = result['name'] ?? '체험 회원';
+                  final info = "키: ${result['height']}cm, 나이: ${result['age']}세, 특이사항: ${result['note']}";
+
+                  // 정보가 담긴 스케줄 생성
+                  final schedule = _createSchedule(name, notes: info);
+                  
+                  // HomeScreen으로 전달 (-> SessionLogScreen 이동)
+                  widget.onStart(schedule);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$name님과 수업을 시작합니다.')),
+                  );
+                }
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
@@ -133,9 +170,8 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
                           onTap: () {
                             Navigator.pop(context);
                             // TODO: 선택된 회원 정보로 운동 일지 이동
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${member.name} 회원님과 수동 수업을 시작합니다.')),
-                            );
+                            final schedule = _createSchedule(member.name, memberId: member.id);
+                            widget.onStart(schedule);
                           },
                         );
                       },
@@ -149,6 +185,99 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
           onPressed: () => Navigator.pop(context),
           style: TextButton.styleFrom(foregroundColor: Colors.grey),
           child: const Text('취소'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class _NewMemberInputDialog extends StatefulWidget {
+  const _NewMemberInputDialog({super.key});
+
+  @override
+  State<_NewMemberInputDialog> createState() => _NewMemberInputDialogState();
+}
+
+class _NewMemberInputDialogState extends State<_NewMemberInputDialog> {
+  final _nameController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _noteController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _heightController.dispose();
+    _ageController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('체험 회원 정보 입력', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: '이름 (필수)', hintText: '홍길동'),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _heightController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: '키 (cm)', hintText: '175'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _ageController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: '나이', hintText: '30'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _noteController,
+              decoration: const InputDecoration(labelText: '특이사항', hintText: '운동 목적, 부상 부위 등'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context), // 입력 취소 (null 반환)
+          child: const Text('취소', style: TextStyle(color: Colors.grey)),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_nameController.text.isEmpty) return; // 이름 없으면 반응 안 함
+
+            // 입력받은 데이터를 Map으로 묶어서 반환 (이 데이터가 위의 result 변수에 들어감)
+            Navigator.pop(context, {
+              'name': _nameController.text,
+              'height': _heightController.text,
+              'age': _ageController.text,
+              'note': _noteController.text,
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: const Text('시작하기'),
         ),
       ],
     );

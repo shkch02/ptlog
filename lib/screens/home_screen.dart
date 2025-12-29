@@ -3,8 +3,9 @@ import 'package:intl/intl.dart';
 import '../data/mock_data.dart';
 import '../models/index.dart';
 import '../widgets/manual_session_dialog.dart';
-import '../widgets/upcoming_session_section.dart'; // 분리한 위젯 import
-import '../widgets/renewal_needed_section.dart';   // 분리한 위젯 import
+import '../widgets/upcoming_session_section.dart'; 
+import '../widgets/renewal_needed_section.dart';   
+import '../screens/session_log_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onGoToSchedule; // 스케줄 탭으로 이동하기 위한 콜백
@@ -25,7 +26,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showManualSessionDialog() {
     showDialog(
       context: context,
-      builder: (context) => ManualSessionDialog(members: mockMembers),
+      builder: (context) => ManualSessionDialog(
+        members: mockMembers,
+        // [수정] 다이얼로그에서 스케줄 정보를 받아 화면 이동
+        onStart: (schedule) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SessionLogScreen(schedule: schedule),
+            ),
+          );
+        },
+      ),
     );
   }
 
