@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // 실제 로그인 요청 (지금은 더미지만 나중에 진짜 서버 통신됨)
     // 소셜 로그인 버튼이므로 ID/PW는 임시값 혹은 토큰 방식 사용 예정
-    final isSuccess = await _authRepo.login('social_user', 'token'); 
+    final isSuccess = await _authRepo.login('test', '1234'); 
 
     // 화면이 살아있는지 확인 후 로딩 종료
     if (mounted) {
