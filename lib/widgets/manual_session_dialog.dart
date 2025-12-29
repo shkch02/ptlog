@@ -78,35 +78,39 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
             // 2. 신규/체험 회원 세션 시작 버튼
             InkWell(
               onTap: () async {
+                // async gap 이전에 context를 사용하는 변수를 미리 선언
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+
                 final result = await showDialog<Map<String, String>>(
                   context: context,
                   builder: (context) => const _NewMemberInputDialog(),
                 );
 
-                if(result != null && mounted) {
-                  Navigator.pop(context); // 기존 다이얼로그 닫기
+                if (result == null || !mounted) return;
 
-                  final name = result['name'] ?? '체험 회원';
-                  final info = "키: ${result['height']}cm, 나이: ${result['age']}세, 특이사항: ${result['note']}";
+                navigator.pop(); // 기존 다이얼로그 닫기
 
-                  // 정보가 담긴 스케줄 생성
-                  final schedule = _createSchedule(name, notes: info);
-                  
-                  // HomeScreen으로 전달 (-> SessionLogScreen 이동)
-                  widget.onStart(schedule);
+                final name = result['name'] ?? '체험 회원';
+                final info = "키: ${result['height']}cm, 나이: ${result['age']}세, 특이사항: ${result['note']}";
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$name님과 수업을 시작합니다.')),
-                  );
-                }
+                // 정보가 담긴 스케줄 생성
+                final schedule = _createSchedule(name, notes: info);
+                
+                // HomeScreen으로 전달 (-> SessionLogScreen 이동)
+                widget.onStart(schedule);
+
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('$name님과 수업을 시작합니다.')),
+                );
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  border: Border.all(color: Colors.blue.withAlpha(77)), // withOpacity(0.3)
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.blue.withOpacity(0.05),
+                  color: Colors.blue.withAlpha(13), // withOpacity(0.05)
                 ),
                 child: Row(
                   children: [
@@ -193,7 +197,7 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
 
 
 class _NewMemberInputDialog extends StatefulWidget {
-  const _NewMemberInputDialog({super.key});
+  const _NewMemberInputDialog();
 
   @override
   State<_NewMemberInputDialog> createState() => _NewMemberInputDialogState();

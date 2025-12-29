@@ -44,21 +44,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     super.dispose();
   }
 
-  void _editScheduleTime(Schedule schedule) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: 10, minute: 0),
-    );
-    if (picked != null) {
-      setState(() {
-        // UI 갱신 (실제 DB 연동 필요)
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${picked.format(context)}로 시간이 변경되었습니다 (더미)'))
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Dialog(

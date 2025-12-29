@@ -82,7 +82,7 @@ class UpcomingSessionSection extends StatelessWidget {
         border: Border.all(color: Colors.blue[100]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.05),
+            color: Colors.blue.withAlpha(13), // withOpacity(0.05)
             blurRadius: 12,
             offset: const Offset(0, 6),
           )
@@ -153,7 +153,7 @@ class UpcomingSessionSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withAlpha(77), // withOpacity(0.3)
             blurRadius: 12,
             offset: const Offset(0, 6),
           )
@@ -171,7 +171,7 @@ class UpcomingSessionSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withAlpha(51), // withOpacity(0.2)
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -196,9 +196,9 @@ class UpcomingSessionSection extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withAlpha(38), // withOpacity(0.15)
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      border: Border.all(color: Colors.white.withAlpha(77)), // withOpacity(0.3)
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -236,7 +236,7 @@ class UpcomingSessionSection extends StatelessWidget {
                       ),
                       Text(
                         schedule.notes.isNotEmpty ? schedule.notes : '특이사항 없음',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                        style: TextStyle(color: Colors.white.withAlpha(204), fontSize: 14), // withOpacity(0.8)
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -250,9 +250,9 @@ class UpcomingSessionSection extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withAlpha(38), // withOpacity(0.15)
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                      border: Border.all(color: Colors.white.withAlpha(77), width: 1), // withOpacity(0.3)
                     ),
                     child: Row(
                       children: const [

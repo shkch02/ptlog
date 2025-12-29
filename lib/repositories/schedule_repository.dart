@@ -62,7 +62,6 @@ class ScheduleRepository {
 
   Future<String?> getNextSessionTime() async {
     await Future.delayed(const Duration(milliseconds: 300));
-    final now = DateTime.now();
     
     // 전체 스케줄 중에서 미래 수업 하나 찾기
     // (여기서는 mockSchedules를 쓰지만 나중엔 DB 쿼리로 변경됨)

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../data/mock_data.dart';
 import '../models/index.dart';
 
@@ -59,7 +58,7 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Colors.blue.withAlpha(77), // withOpacity(0.3)
                   shape: BoxShape.circle,
                 ),
               ),
