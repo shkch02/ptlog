@@ -1,76 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/index.dart';
-import '../data/mock_data.dart'; // 전체 스케줄(mockSchedules) 접근을 위해 필요
-import 'member_detail_dialog.dart';
 import '../screens/session_log_screen.dart';
+
+typedef OnMemberInfoTap = void Function(String memberId);
 
 class UpcomingSessionSection extends StatelessWidget {
   final List<Schedule> schedules;
   final VoidCallback onManualStart;
+  final String? emptyMessage;
+  final OnMemberInfoTap onMemberInfoTap;
 
   const UpcomingSessionSection({
     super.key,
     required this.schedules,
     required this.onManualStart,
+    this.emptyMessage,
+    required this.onMemberInfoTap,
   });
 
   // 헤더 멘트 생성 로직 (수정됨)
   String _getDynamicHeaderText() {
+
+    if (schedules.isEmpty) {
+      return emptyMessage ?? '오늘 남은 수업이 없어요';
+    }
+
     final now = DateTime.now();
+    final firstSchedule = schedules.first;
 
     // 1. 현재 타임에 전달된 스케줄이 없는 경우 (빈 화면 or 수동 카드 상태)
-    if (schedules.isEmpty) {
-      // 오늘 날짜 문자열 (yyyy-MM-dd)
-      final todayStr = now.toString().split(' ')[0];
-
-      // 전체 스케줄(mockSchedules)에서 '오늘' & '현재 시간 이후'인 수업 필터링
-      final futureSchedules = mockSchedules.where((s) {
-        // 날짜가 오늘이 아니면 제외
-        if (s.date != todayStr) return false;
-
-        // 시간 파싱 및 비교
-        try {
-          final timeParts = s.startTime.split(':');
-          final h = int.parse(timeParts[0]);
-          final m = int.parse(timeParts[1]);
-          final scheduleDate = DateTime(now.year, now.month, now.day, h, m);
-          
-          return scheduleDate.isAfter(now); // 현재 시간보다 이후인지 확인
-        } catch (e) {
-          return false;
-        }
-      }).toList();
-
-      if (futureSchedules.isNotEmpty) {
-        // 시간순 정렬 (가장 가까운 수업 찾기)
-        futureSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
-        
-        final nextSchedule = futureSchedules.first;
-        final hour = int.parse(nextSchedule.startTime.split(':')[0]);
-        
-        return '$hour시에 수업이 있어요 ⏳'; // 요청하신 멘트
-      } else {
-        // 오늘 남은 수업이 아예 없는 경우
-        return '오늘 남은 수업이 없어요 🌙';
-      }
-    } 
-    // 2. 현재 타임에 스케줄이 있는 경우 (기존 로직 유지)
-    else {
-      final firstSchedule = schedules.first;
+    try {
       final timeParts = firstSchedule.startTime.split(':');
       final scheduleHour = int.parse(timeParts[0]);
       final scheduleMinute = int.parse(timeParts[1]);
+      
+      // 날짜까지 고려한 시간 비교
       final scheduleTime = DateTime(now.year, now.month, now.day, scheduleHour, scheduleMinute);
       final diffMinutes = scheduleTime.difference(now).inMinutes;
 
       if (diffMinutes > 0 && diffMinutes < 60) {
         return '$diffMinutes분 뒤에 수업이 있어요! ⏰';
-      } else if (diffMinutes <= 0) {
+      } else if (diffMinutes <= 0 && diffMinutes > -60) { // 수업 중
         return '수업 시작 시간이에요! 🔥';
       } else {
         return '오늘 예정된 수업이 있어요 💪';
       }
+    } catch (e) {
+      return '오늘 예정된 수업이 있어요 💪';
     }
   }
 
@@ -90,7 +67,7 @@ class UpcomingSessionSection extends StatelessWidget {
         if (schedules.isEmpty)
           _buildManualStartCard()
         else
-          ...schedules.map((schedule) => _buildSessionCard(context, schedule)),
+          ...schedules.take(1).map((schedule)   => _buildSessionCard(context, schedule)),
       ],
     );
   }
@@ -268,19 +245,7 @@ class UpcomingSessionSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 InkWell(
-                  onTap: () {
-                    try {
-                      final member = mockMembers.firstWhere((m) => m.id == schedule.memberId);
-                      showDialog(
-                        context: context,
-                        builder: (context) => MemberDetailDialog(member: member),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('회원 정보를 찾을 수 없습니다.')),
-                      );
-                    }
-                  },
+                  onTap: () => onMemberInfoTap(schedule.memberId),
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

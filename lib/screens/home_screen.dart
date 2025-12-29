@@ -5,7 +5,9 @@ import '../repositories/member_repository.dart';   // Repository import
 import '../widgets/manual_session_dialog.dart';
 import '../widgets/upcoming_session_section.dart';
 import '../widgets/renewal_needed_section.dart';
+import '../widgets/member_detail_dialog.dart';
 import 'session_log_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onGoToSchedule;
@@ -25,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Member> _renewalMembers = [];
   List<Member> _allMembers = []; // 다이얼로그용
   bool _isLoading = true;
+  String? _nextSessionMessage;
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _scheduleRepo.getUpcomingSchedules(),
       _memberRepo.getRenewalNeededMembers(),
       _memberRepo.getAllMembers(),
+      _scheduleRepo.getNextSessionTime(),
     ]);
 
     if (mounted) {
@@ -46,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _upcomingSchedules = results[0] as List<Schedule>;
         _renewalMembers = results[1] as List<Member>;
         _allMembers = results[2] as List<Member>;
+        _nextSessionMessage = results[3] as String?;
         _isLoading = false;
       });
     }
@@ -82,6 +87,23 @@ class _HomeScreenState extends State<HomeScreen> {
           UpcomingSessionSection(
             schedules: _upcomingSchedules,
             onManualStart: _showManualSessionDialog,
+            emptyMessage: _nextSessionMessage,
+
+            onMemberInfoTap: (memberId) {
+              try {
+                // 이미 로딩된 _allMembers 리스트에서 찾음 (Repository 안 써도 됨)
+                final member = _allMembers.firstWhere((m) => m.id == memberId);
+                
+                showDialog(
+                  context: context,
+                  builder: (context) => MemberDetailDialog(member: member),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('회원 정보를 찾을 수 없습니다.')),
+                );
+              }
+            },
           ),
           Center(
             child: TextButton(

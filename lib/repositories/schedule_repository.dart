@@ -30,4 +30,54 @@ class ScheduleRepository {
       return true;
     }).toList();
   }
+
+  Future<String?> getNextSessionHint() async {
+    // 나중엔 DB 쿼리로 '오늘 날짜 & 현재 시간 이후' 중 가장 빠른 1개 조회로 변경
+    await Future.delayed(const Duration(milliseconds: 100)); // 모의 지연
+    
+    final now = DateTime.now();
+    final todayStr = now.toString().split(' ')[0];
+
+    // 오늘 날짜의 미래 스케줄 필터링
+    final futureSchedules = mockSchedules.where((s) {
+      if (s.date != todayStr) return false;
+      try {
+        final timeParts = s.startTime.split(':');
+        final scheduleDate = DateTime(now.year, now.month, now.day, int.parse(timeParts[0]), int.parse(timeParts[1]));
+        return scheduleDate.isAfter(now);
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+
+    if (futureSchedules.isNotEmpty) {
+      futureSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
+      final next = futureSchedules.first;
+      final hour = int.parse(next.startTime.split(':')[0]);
+      return '$hour시에 수업이 있어요 ⏳';
+    }
+    
+    return null; // 오늘 남은 수업 없음
+  }
+
+  Future<String?> getNextSessionTime() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final now = DateTime.now();
+    
+    // 전체 스케줄 중에서 미래 수업 하나 찾기
+    // (여기서는 mockSchedules를 쓰지만 나중엔 DB 쿼리로 변경됨)
+    final futureSchedules = mockSchedules.where((s) {
+       // ... 날짜/시간 비교 로직 ...
+       return true; 
+    }).toList();
+
+    if (futureSchedules.isNotEmpty) {
+      futureSchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
+      final next = futureSchedules.first;
+      final hour = int.parse(next.startTime.split(':')[0]);
+      return '$hour시에 수업이 있어요 ⏳';
+    }
+    
+    return null; // 미래 수업도 없음
+  }
 }
