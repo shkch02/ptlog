@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../data/mock_data.dart'; // [중요] Dialog 내부에서 아직 mock 데이터를 쓰므로 주석 해제
 import '../repositories/member_repository.dart';
 import '../models/index.dart'; 
+import '../widgets/member_detail_dialog.dart';
 
 class MemberListScreen extends StatefulWidget {
   const MemberListScreen({super.key});
@@ -232,19 +233,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
   }
 }
 
-// ------------------------------------------------------------------------
-// 팝업 다이얼로그 (여기서는 당장 mock_data가 필요해서 위에서 import를 살려둠)
-// ------------------------------------------------------------------------
-class MemberDetailDialog extends StatefulWidget {
-  final Member member;
 
-  const MemberDetailDialog({super.key, required this.member});
 
-  @override
-  State<MemberDetailDialog> createState() => _MemberDetailDialogState();
-}
-
-class _MemberDetailDialogState extends State<MemberDetailDialog> {
   late TextEditingController _notesController;
   late List<Schedule> _memberSchedules;
   late List<PaymentLog> _memberPayments;
