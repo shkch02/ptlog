@@ -13,4 +13,11 @@ class MemberRepository {
     await Future.delayed(const Duration(milliseconds: 300));
     return mockMembers.where((m) => m.remainingSessions <= 3).toList();
   }
+
+  // [추가] 특정 회원의 결제 내역 가져오기
+  Future<List<PaymentLog>> getPaymentHistory(String memberId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    // mockPaymentLogs는 mock_data.dart에 있다고 가정
+    return mockPaymentLogs.where((p) => p.memberId == memberId).toList();
+  }
 }

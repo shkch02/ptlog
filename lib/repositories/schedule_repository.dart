@@ -79,4 +79,19 @@ class ScheduleRepository {
     
     return null; // 미래 수업도 없음
   }
+
+  Future<List<Schedule>> getSchedulesByMember(String memberId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    final memberSchedules = mockSchedules.where((s) => s.memberId == memberId).toList();
+    
+    // 과거 -> 미래 순으로 정렬
+    memberSchedules.sort((a, b) {
+      String dtA = '${a.date} ${a.startTime}';
+      String dtB = '${b.date} ${b.startTime}';
+      return dtA.compareTo(dtB); 
+    });
+    
+    return memberSchedules;
+  }
 }

@@ -378,7 +378,7 @@ List<Schedule> mockSchedules = [
     date: DateTime.now().toString().split(' ')[0], // 오늘
     startTime: '21:00',
     endTime: '22:00',
-    notes: '등 운동 위주',
+    notes: '허리 디스크 병력 있음. 데드리프트 중량 치지 말 것',
     reminder: '10분 전 알림',
   ),
   Schedule(
@@ -388,7 +388,7 @@ List<Schedule> mockSchedules = [
     date: DateTime.now().toString().split(' ')[0], // 오늘
     startTime: '04:00',
     endTime: '05:00',
-    notes: '하체 비만 관리',
+    notes: '하체 비만 관리: 스쿼트 자세 교정 필요',
     reminder: '1시간 전 알림',
   ),
   
@@ -400,7 +400,7 @@ List<Schedule> mockSchedules = [
     date: DateTime.now().add(const Duration(days: 1)).toString().split(' ')[0], // 내일
     startTime: '10:00',
     endTime: '11:00',
-    notes: '가슴 운동',
+    notes: '등 운동: 랫풀다운, 시티드 로우 (허리 조심)',
     reminder: '10분 전 알림',
   ),
   

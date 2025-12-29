@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
-import '../data/mock_data.dart';
+//import '../data/mock_data.dart';
 import '../models/index.dart';
+import '../repositories/schedule_repository.dart'; 
+import '../repositories/member_repository.dart'; 
 
 class MemberDetailDialog extends StatefulWidget {
   final Member member;
@@ -16,8 +18,15 @@ class MemberDetailDialog extends StatefulWidget {
 class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late TextEditingController _notesController;
-  late List<Schedule> _memberSchedules;
-  late List<PaymentLog> _memberPayments;
+  
+  // Repository 인스턴스
+  final ScheduleRepository _scheduleRepo = ScheduleRepository();
+  final MemberRepository _memberRepo = MemberRepository();
+
+  // 데이터 담을 변수
+  List<Schedule> _memberSchedules = [];
+  List<PaymentLog> _memberPayments = [];
+  bool _isLoading = true; // 로딩 상태
 
   @override
   void initState() {
@@ -25,16 +34,23 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     _tabController = TabController(length: 4, vsync: this);
     _notesController = TextEditingController(text: widget.member.notes);
     
-    _memberSchedules = mockSchedules.where((s) => s.memberId == widget.member.id).toList();
-    
-    // 1. PT 세션 정렬: 과거 -> 미래 (오름차순)
-    _memberSchedules.sort((a, b) {
-      String dtA = '${a.date} ${a.startTime}';
-      String dtB = '${b.date} ${b.startTime}';
-      return dtA.compareTo(dtB); 
-    });
+    // 데이터 로딩 시작
+    _loadAsyncData();
+  }
 
-    _memberPayments = mockPaymentLogs.where((p) => p.memberId == widget.member.id).toList();
+  Future<void> _loadAsyncData() async {
+    final results = await Future.wait([
+      _scheduleRepo.getSchedulesByMember(widget.member.id),
+      _memberRepo.getPaymentHistory(widget.member.id),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _memberSchedules = results[0] as List<Schedule>;
+        _memberPayments = results[1] as List<PaymentLog>;
+        _isLoading = false; // 로딩 완료
+      });
+    }
   }
 
   @override
@@ -53,7 +69,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 팝업 헤더
+            // 팝업 헤더 (여기는 member 정보가 이미 있어서 바로 그림)
             Row(
               children: [
                 CircleAvatar(
@@ -71,7 +87,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                         children: [
                           Text(widget.member.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(width: 8),
-                          // PT 횟수 배지
                           _buildSessionBadge(widget.member.remainingSessions, widget.member.totalSessions),
                         ],
                       ),
@@ -100,17 +115,19 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
             ),
             const SizedBox(height: 16),
 
-            // 탭 내용물
+            // 탭 내용물 (로딩 중이면 로딩 표시)
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildPTSessionsTab(),
-                  _buildBasicInfoTab(),
-                  _buildDetailedMemoTab(),
-                  _buildPaymentTab(),
-                ],
-              ),
+              child: _isLoading 
+                  ? const Center(child: CircularProgressIndicator()) 
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildPTSessionsTab(),
+                        _buildBasicInfoTab(),
+                        _buildDetailedMemoTab(),
+                        _buildPaymentTab(),
+                      ],
+                    ),
             ),
             
             // 닫기 버튼
@@ -134,24 +151,23 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     if (_memberSchedules.isEmpty) {
       return const Center(child: Text('예약된 스케줄이 없습니다.'));
     }
-
+    // ... (기존과 동일)
     final now = DateTime.now();
-
     return ListView.builder(
       itemCount: _memberSchedules.length,
       itemBuilder: (context, index) {
         final schedule = _memberSchedules[index];
-        
+        // ... (나머지 동일)
         DateTime scheduleTime;
         try {
           scheduleTime = DateFormat('yyyy-MM-dd HH:mm').parse('${schedule.date} ${schedule.startTime}');
         } catch (e) {
           scheduleTime = now;
         }
-
         final isPast = scheduleTime.isBefore(now);
-
+        // ... (UI 리턴 부분 동일)
         return Container(
+          // ... (스타일)
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: BoxDecoration(
@@ -161,7 +177,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           ),
           child: Row(
             children: [
-              // 날짜 및 상태
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,8 +201,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                   ],
                 ),
               ),
-              
-              // 운동기록 버튼
               OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('보고서 기능 준비중')));
@@ -238,8 +251,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
             ),
           ),
           const SizedBox(height: 24),
-          
-          // 신체 정보 헤더 + InBody 버튼
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -277,7 +288,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                   const Divider(height: 16),
                   _buildInfoRow(LucideIcons.percent, '현재 체지방', '18 %'),
                   const Divider(height: 16),
-                  // ★ 수정됨: bicepsFlexed -> zap (아이콘 대체)
                   _buildInfoRow(LucideIcons.zap, '현재 골격근량', '35 kg'),
                   const Divider(height: 16),
                   _buildInfoRow(LucideIcons.trendingUp, '목표 골격근량', '38 kg'),

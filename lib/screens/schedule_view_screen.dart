@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/index.dart';
-import '../data/mock_data.dart';
-import '../widgets/schedule_dialogs.dart'; // ★ 분리한 위젯 import
+import '../repositories/schedule_repository.dart'; // [수정] Repository import
+import '../widgets/schedule_dialogs.dart';
 
 class ScheduleViewScreen extends StatefulWidget {
   const ScheduleViewScreen({super.key});
@@ -14,47 +14,62 @@ class ScheduleViewScreen extends StatefulWidget {
 }
 
 class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
+  // [수정] Repository 인스턴스 생성
+  final ScheduleRepository _scheduleRepo = ScheduleRepository();
+  
   DateTime _selectedDate = DateTime.now();
+  
+  // [수정] 상태 관리 변수 추가
+  List<Schedule> _dailySchedules = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('ko_KR', null);
+    _fetchSchedules(); // [수정] 데이터 로드 시작
+  }
+
+  // [수정] 비동기로 데이터 가져오기
+  Future<void> _fetchSchedules() async {
+    setState(() => _isLoading = true); // 로딩 시작
+
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final schedules = await _scheduleRepo.getSchedulesByDate(dateStr);
+
+    if (mounted) {
+      setState(() {
+        _dailySchedules = schedules;
+        _isLoading = false; // 로딩 끝
+      });
+    }
   }
 
   String get _formattedHeaderDate {
     return DateFormat('MM/dd(E)', 'ko_KR').format(_selectedDate);
   }
 
-  String get _selectedDateString {
-    return DateFormat('yyyy-MM-dd').format(_selectedDate);
-  }
-
   void _changeDate(int days) {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: days));
     });
+    _fetchSchedules(); // [수정] 날짜 변경 시 데이터 다시 조회
   }
 
   @override
   Widget build(BuildContext context) {
-    // 데이터 필터링
-    final dailySchedules = mockSchedules
-        .where((schedule) => schedule.date == _selectedDateString)
-        .toList();
-
-    dailySchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
+    // [삭제] 여기서 직접 mockSchedules 필터링하던 로직 제거됨
 
     return Column(
       children: [
         // -----------------------------------------------------------
-        // 1. 상단 헤더 (버튼 디자인 변경됨)
+        // 1. 상단 헤더
         // -----------------------------------------------------------
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
             children: [
-              // (1) 주간 시간표 버튼 (아이콘 + 텍스트)
+              // (1) 주간 시간표 버튼
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -112,7 +127,7 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                 ),
               ),
 
-              // (3) 월간 달력 버튼 (아이콘 + 텍스트)
+              // (3) 월간 달력 버튼
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -124,6 +139,7 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                           focusedDay: _selectedDate,
                           onDaySelected: (newDate) {
                             setState(() => _selectedDate = newDate);
+                            _fetchSchedules(); // [수정] 달력에서 날짜 선택 시에도 다시 조회
                           },
                         ),
                       );
@@ -152,16 +168,19 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
         // 2. 스케줄 리스트 바디
         // -----------------------------------------------------------
         Expanded(
-          child: dailySchedules.isEmpty
-              ? _buildEmptyView()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: dailySchedules.length,
-                  itemBuilder: (context, index) {
-                    final schedule = dailySchedules[index];
-                    return _buildScheduleCard(schedule);
-                  },
-                ),
+          // [수정] 로딩 중일 때와 아닐 때 분기 처리
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _dailySchedules.isEmpty
+                  ? _buildEmptyView()
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _dailySchedules.length,
+                      itemBuilder: (context, index) {
+                        final schedule = _dailySchedules[index];
+                        return _buildScheduleCard(schedule);
+                      },
+                    ),
         ),
       ],
     );
@@ -190,6 +209,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
   }
 
   Widget _buildScheduleCard(Schedule schedule) {
+    // ... (기존 카드 위젯 코드 그대로 유지) ...
+    // (아래 코드는 생략합니다. 기존 코드 그대로 쓰시면 됩니다.)
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
