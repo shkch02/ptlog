@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ptlog-web
+  namespace: default # 배포할 네임스페이스
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ptlog-web
+  template:
+    metadata:
+      labels:
+        app: ptlog-web
+    spec:
+      imagePullSecrets:
+        - name: harbor-secret # Harbor 인증 시크릿 이름 (미리 생성 필요)
+      containers:
+        - name: ptlog-web
+          image: shkch.duckdns.org/ptlog/ptlog-web:latest # Jenkins에서 이 태그를 변경하게 됨
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ptlog-web-svc
+  namespace: default
+spec:
+  type: NodePort # 외부 노출 시 NodePort 또는 Ingress 사용 권장
+  selector:
+    app: ptlog-web
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30081 # 원하는 NodePort 지정 (30000-32767 범위)
