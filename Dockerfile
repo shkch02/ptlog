@@ -1,5 +1,5 @@
 # 1. Build Stage: Flutter 빌드 환경
-FROM ghcr.io/cirruslabs/flutter:3.19.6 AS build
+FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN flutter build web --release --web-renderer html
 FROM nginx:alpine
 
 # Nginx 기본 설정 파일 교체 (SPA 라우팅 문제 해결용, 아래 팁 참조)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf 
+ COPY nginx.conf /etc/nginx/conf.d/default.conf 
 
 # 빌드된 결과물을 Nginx 폴더로 복사
 COPY --from=build /app/build/web /usr/share/nginx/html
