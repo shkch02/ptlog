@@ -51,8 +51,8 @@ class _LayoutScreenState extends State<LayoutScreen> {
 
       // 1. 홈 버튼 설정
       floatingActionButton: SizedBox(
-        width: 72, 
-        height: 72,
+        width: 60, 
+        height: 60,
         child: FloatingActionButton(
           onPressed: () => _onItemTapped(1),
           backgroundColor: AppColors.primary,
