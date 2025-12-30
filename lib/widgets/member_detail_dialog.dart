@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/repository_providers.dart';
 import 'package:ptlog/widgets/member_detail_tabs/basic_info_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/detailed_memo_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/payment_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/pt_sessions_tab.dart';
 import '../models/index.dart';
-import '../repositories/schedule_repository.dart';
-import '../repositories/member_repository.dart';
 
-class MemberDetailDialog extends StatefulWidget {
+class MemberDetailDialog extends ConsumerStatefulWidget {
   final Member member;
 
   const MemberDetailDialog({super.key, required this.member});
 
   @override
-  State<MemberDetailDialog> createState() => _MemberDetailDialogState();
+  ConsumerState<MemberDetailDialog> createState() => _MemberDetailDialogState();
 }
 
-class _MemberDetailDialogState extends State<MemberDetailDialog>
+class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late TextEditingController _notesController;
-
-  final ScheduleRepository _scheduleRepo = ScheduleRepository();
-  final MemberRepository _memberRepo = MemberRepository();
 
   List<Schedule> _memberSchedules = [];
   List<PaymentLog> _memberPayments = [];
@@ -41,11 +37,14 @@ class _MemberDetailDialogState extends State<MemberDetailDialog>
   }
 
   Future<void> _loadAsyncData() async {
-    final results = await Future.wait([
-      _scheduleRepo.getSchedulesByMember(widget.member.id),
-      _memberRepo.getPaymentHistory(widget.member.id),
-    ]);
+    final scheduleRepo = ref.read(scheduleRepositoryProvider);
+    final memberRepo = ref.read(memberRepositoryProvider);
 
+    final results = await Future.wait([
+      scheduleRepo.getSchedulesByMember(widget.member.id),
+      memberRepo.getPaymentHistory(widget.member.id),
+    ]);
+  
     if (mounted) {
       setState(() {
         _memberSchedules = results[0] as List<Schedule>;
@@ -64,6 +63,8 @@ class _MemberDetailDialogState extends State<MemberDetailDialog>
 
   @override
   Widget build(BuildContext context) {
+    final memberRepo = ref.read(memberRepositoryProvider);
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -127,7 +128,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog>
                         BasicInfoTab(member: widget.member),
                         DetailedMemoTab(
                           notesController: _notesController,
-                          memberRepo: _memberRepo,
+                          memberRepo: memberRepo,
                           member: widget.member,
                         ),
                         PaymentTab(memberPayments: _memberPayments),

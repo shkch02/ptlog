@@ -4,13 +4,13 @@ import 'package:ptlog/repositories/member_repository.dart';
 import 'package:ptlog/repositories/schedule_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
+  return AuthRepository(ref);
 });
 
 final memberRepositoryProvider = Provider<MemberRepository>((ref) {
-  return MemberRepository();
+  return MemberRepository(ref);
 });
 
 final scheduleRepositoryProvider = Provider<ScheduleRepository>((ref) {
-  return ScheduleRepository();
+  return ScheduleRepository(ref);
 });

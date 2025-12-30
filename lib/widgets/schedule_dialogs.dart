@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/repository_providers.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../models/index.dart';
-import '../repositories/schedule_repository.dart';
 
 class MonthlyCalendarDialog extends StatefulWidget {
   final DateTime focusedDay;
@@ -82,17 +83,17 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
   }
 }
 
-class WeeklyTimetableDialog extends StatefulWidget {
+class WeeklyTimetableDialog extends ConsumerStatefulWidget {
   final DateTime selectedDate;
 
   const WeeklyTimetableDialog({super.key, required this.selectedDate});
 
   @override
-  State<WeeklyTimetableDialog> createState() => _WeeklyTimetableDialogState();
+  ConsumerState<WeeklyTimetableDialog> createState() =>
+      _WeeklyTimetableDialogState();
 }
 
-class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
-  final ScheduleRepository _scheduleRepo = ScheduleRepository();
+class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
   List<Schedule> _weeklySchedules = [];
   bool _isLoading = true;
 
@@ -101,14 +102,16 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
   @override
   void initState() {
     super.initState();
-    _sunday = widget.selectedDate.subtract(Duration(days: widget.selectedDate.weekday % 7));
+    _sunday = widget.selectedDate
+        .subtract(Duration(days: widget.selectedDate.weekday % 7));
     _fetchWeeklyData();
   }
 
   Future<void> _fetchWeeklyData() async {
+    final scheduleRepo = ref.read(scheduleRepositoryProvider);
     final saturday = _sunday.add(const Duration(days: 6));
-    
-    final schedules = await _scheduleRepo.getWeeklySchedules(_sunday, saturday);
+
+    final schedules = await scheduleRepo.getWeeklySchedules(_sunday, saturday);
 
     if (mounted) {
       setState(() {
@@ -136,11 +139,12 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('주간 시간표', style: AppTextStyles.h3),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close)),
               ],
             ),
             const SizedBox(height: 10),
-            
             if (_isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             else ...[
@@ -160,10 +164,18 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                         ),
                         child: Column(
                           children: [
-                            Text(DateFormat(AppStrings.dateFormatE, AppStrings.localeKo).format(day), 
-                              style: AppTextStyles.button.copyWith(fontSize: 12, color: index == 0 ? AppColors.danger : AppColors.black)),
-                            Text(DateFormat(AppStrings.dateFormatd).format(day), 
-                              style: AppTextStyles.caption),
+                            Text(
+                                DateFormat(AppStrings.dateFormatE,
+                                        AppStrings.localeKo)
+                                    .format(day),
+                                style: AppTextStyles.button.copyWith(
+                                    fontSize: 12,
+                                    color: index == 0
+                                        ? AppColors.danger
+                                        : AppColors.black)),
+                            Text(
+                                DateFormat(AppStrings.dateFormatd).format(day),
+                                style: AppTextStyles.caption),
                           ],
                         ),
                       ),
@@ -172,17 +184,18 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                 ],
               ),
               const Divider(height: 1),
-
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
-                    children: List.generate(endHour - startHour + 1, (hourIndex) {
+                    children:
+                        List.generate(endHour - startHour + 1, (hourIndex) {
                       final currentHour = startHour + hourIndex;
-                      
+
                       return Container(
                         height: 60,
                         decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(color: AppColors.disabled)),
+                          border: Border(
+                              bottom: BorderSide(color: AppColors.disabled)),
                         ),
                         child: Row(
                           children: [
@@ -195,15 +208,29 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                               ),
                             ),
                             ...List.generate(7, (dayIndex) {
-                              final cellDate = _sunday.add(Duration(days: dayIndex));
-                              final cellDateStr = DateFormat(AppStrings.dateFormatYmd).format(cellDate);
-                              
+                              final cellDate =
+                                  _sunday.add(Duration(days: dayIndex));
+                              final cellDateStr =
+                                  DateFormat(AppStrings.dateFormatYmd)
+                                      .format(cellDate);
+
                               final schedule = _weeklySchedules.firstWhere(
                                 (s) {
-                                  final sHour = int.tryParse(s.startTime.split(':')[0]) ?? -1;
-                                  return s.date == cellDateStr && sHour == currentHour;
+                                  final sHour =
+                                      int.tryParse(s.startTime.split(':')[0]) ??
+                                          -1;
+                                  return s.date == cellDateStr &&
+                                      sHour == currentHour;
                                 },
-                                orElse: () => Schedule(id: '', memberId: '', memberName: '', date: '', startTime: '', endTime: '', notes: '', reminder: ''),
+                                orElse: () => Schedule(
+                                    id: '',
+                                    memberId: '',
+                                    memberName: '',
+                                    date: '',
+                                    startTime: '',
+                                    endTime: '',
+                                    notes: '',
+                                    reminder: ''),
                               );
 
                               final hasSchedule = schedule.id.isNotEmpty;
@@ -212,21 +239,28 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                                 child: Container(
                                   margin: const EdgeInsets.all(1),
                                   decoration: BoxDecoration(
-                                    color: hasSchedule ? AppColors.primaryLight : null,
+                                    color: hasSchedule
+                                        ? AppColors.primaryLight
+                                        : null,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: hasSchedule
                                       ? Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
                                               schedule.memberName,
-                                              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
+                                              style: AppTextStyles.caption
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             Text(
                                               schedule.startTime,
-                                              style: AppTextStyles.caption.copyWith(fontSize: 9),
+                                              style: AppTextStyles.caption
+                                                  .copyWith(fontSize: 9),
                                             ),
                                           ],
                                         )

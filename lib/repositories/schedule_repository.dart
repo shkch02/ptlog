@@ -1,10 +1,13 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_strings.dart';
-
 import '../models/index.dart';
 import '../data/mock_data.dart';
 import 'package:intl/intl.dart';
 
 class ScheduleRepository {
+  final Ref ref;
+  ScheduleRepository(this.ref);
+
   Future<List<Schedule>> getSchedulesByDate(String dateStr) async {
     await Future.delayed(const Duration(milliseconds: 300));
     

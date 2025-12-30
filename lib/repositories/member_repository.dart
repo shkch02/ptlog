@@ -1,7 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ptlog/providers/home_providers.dart';
 import '../models/index.dart';
 import '../data/mock_data.dart';
 
 class MemberRepository {
+  final Ref ref;
+  MemberRepository(this.ref);
+
   // 모든 회원 가져오기
   Future<List<Member>> getAllMembers() async {
     await Future.delayed(const Duration(milliseconds: 300));
@@ -31,6 +36,10 @@ class MemberRepository {
       final updatedMember = mockMembers[index].copyWith(notes: newNotes);
       // 리스트에서 해당 멤버 교체
       mockMembers[index] = updatedMember;
+
+      // 데이터 변경 후, 이 데이터와 관련된 Provider를 무효화!
+      ref.invalidate(allMembersProvider);
+      ref.invalidate(renewalMembersProvider);
     }
   }
 }
