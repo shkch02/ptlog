@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷팅 초기화용 (필요시)
 import 'package:ptlog/constants/app_colors.dart';
 import 'screens/login_screen.dart';
@@ -8,7 +9,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR', null);
   
-  runApp(const PtTrainerApp());
+  runApp(
+    const ProviderScope(
+      child: PtTrainerApp(),
+    ),
+  );
 }
 
 class PtTrainerApp extends StatelessWidget {

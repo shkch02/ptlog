@@ -1,63 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/schedule_providers.dart';
 import '../models/index.dart';
-import '../repositories/schedule_repository.dart';
 import '../widgets/schedule_dialogs.dart';
 
-class ScheduleViewScreen extends StatefulWidget {
+class ScheduleViewScreen extends ConsumerStatefulWidget {
   const ScheduleViewScreen({super.key});
 
   @override
-  State<ScheduleViewScreen> createState() => _ScheduleViewScreenState();
+  ConsumerState<ScheduleViewScreen> createState() => _ScheduleViewScreenState();
 }
 
-class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
-  final ScheduleRepository _scheduleRepo = ScheduleRepository();
-  
+class _ScheduleViewScreenState extends ConsumerState<ScheduleViewScreen> {
   DateTime _selectedDate = DateTime.now();
-  
-  List<Schedule> _dailySchedules = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    initializeDateFormatting(AppStrings.localeKo, null);
-    _fetchSchedules();
-  }
-
-  Future<void> _fetchSchedules() async {
-    setState(() => _isLoading = true);
-
-    final dateStr = DateFormat(AppStrings.dateFormatYmd).format(_selectedDate);
-    final schedules = await _scheduleRepo.getSchedulesByDate(dateStr);
-
-    if (mounted) {
-      setState(() {
-        _dailySchedules = schedules;
-        _isLoading = false;
-      });
-    }
-  }
 
   String get _formattedHeaderDate {
-    return DateFormat(AppStrings.dateFormatMdE, AppStrings.localeKo).format(_selectedDate);
+    return DateFormat(AppStrings.dateFormatMdE, AppStrings.localeKo)
+        .format(_selectedDate);
   }
 
   void _changeDate(int days) {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: days));
     });
-    _fetchSchedules();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Normalize the date to avoid unnecessary rebuilds
+    final normalizedDate =
+        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final asyncSchedules = ref.watch(schedulesByDateProvider(normalizedDate));
+
     return Column(
       children: [
         Padding(
@@ -71,7 +50,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                     onTap: () {
                       showDialog(
                         context: context,
-                        builder: (context) => WeeklyTimetableDialog(selectedDate: _selectedDate),
+                        builder: (context) =>
+                            WeeklyTimetableDialog(selectedDate: _selectedDate),
                       );
                     },
                     borderRadius: BorderRadius.circular(8),
@@ -80,9 +60,13 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(LucideIcons.layoutGrid, size: 24, color: AppColors.textPrimary),
+                          const Icon(LucideIcons.layoutGrid,
+                              size: 24, color: AppColors.textPrimary),
                           const SizedBox(height: 2),
-                          Text('주간', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                          Text('주간',
+                              style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -100,7 +84,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                       icon: const Icon(LucideIcons.chevronLeft, size: 20),
                       onPressed: () => _changeDate(-1),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -113,7 +98,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                       icon: const Icon(LucideIcons.chevronRight, size: 20),
                       onPressed: () => _changeDate(1),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
                   ],
                 ),
@@ -129,7 +115,6 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                           focusedDay: _selectedDate,
                           onDaySelected: (newDate) {
                             setState(() => _selectedDate = newDate);
-                            _fetchSchedules();
                           },
                         ),
                       );
@@ -140,9 +125,13 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(LucideIcons.calendar, size: 24, color: AppColors.primary),
+                          const Icon(LucideIcons.calendar,
+                              size: 24, color: AppColors.primary),
                           const SizedBox(height: 2),
-                          Text('월간', style: AppTextStyles.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          Text('월간',
+                              style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -154,18 +143,23 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
         ),
         const Divider(height: 1),
         Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _dailySchedules.isEmpty
-                  ? _buildEmptyView()
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _dailySchedules.length,
-                      itemBuilder: (context, index) {
-                        final schedule = _dailySchedules[index];
-                        return _buildScheduleCard(schedule);
-                      },
-                    ),
+          child: asyncSchedules.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text('Error: $err')),
+            data: (schedules) {
+              if (schedules.isEmpty) {
+                return _buildEmptyView();
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: schedules.length,
+                itemBuilder: (context, index) {
+                  final schedule = schedules[index];
+                  return _buildScheduleCard(schedule);
+                },
+              );
+            },
+          ),
         ),
       ],
     );
@@ -176,11 +170,13 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(LucideIcons.calendarX, size: 48, color: AppColors.disabled),
+          const Icon(LucideIcons.calendarX,
+              size: 48, color: AppColors.disabled),
           const SizedBox(height: 16),
           Text(
             '예약된 스케줄이 없습니다.',
-            style: AppTextStyles.subtitle1.copyWith(color: AppColors.disabledText),
+            style: AppTextStyles.subtitle1
+                .copyWith(color: AppColors.disabledText),
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
@@ -216,7 +212,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                   ),
                   Text(
                     schedule.endTime,
-                    style: AppTextStyles.subtitle2.copyWith(color: AppColors.disabledText),
+                    style: AppTextStyles.subtitle2
+                        .copyWith(color: AppColors.disabledText),
                   ),
                 ],
               ),
@@ -224,7 +221,9 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
               Container(
                 height: 40,
                 width: 4,
-                decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -245,7 +244,8 @@ class _ScheduleViewScreenState extends State<ScheduleViewScreen> {
                   ],
                 ),
               ),
-              const Icon(LucideIcons.chevronRight, color: AppColors.textLight, size: 20),
+              const Icon(LucideIcons.chevronRight,
+                  color: AppColors.textLight, size: 20),
             ],
           ),
         ),
