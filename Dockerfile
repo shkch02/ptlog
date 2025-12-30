@@ -9,7 +9,7 @@ RUN flutter pub get
 
 # 전체 소스 복사 및 웹 빌드
 COPY . .
-RUN flutter build web --release --web-renderer html
+RUN flutter build web --release
 
 # 2. Production Stage: Nginx로 서빙
 FROM nginx:alpine
