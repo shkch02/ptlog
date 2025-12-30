@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ptlog/constants/app_colors.dart';
+import 'package:ptlog/constants/app_strings.dart';
+import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:table_calendar/table_calendar.dart';
-//import '../data/mock_data.dart';
 import '../models/index.dart';
 import '../repositories/schedule_repository.dart';
 
-// ------------------------------------------------------------------------
-// 1. 월간 달력 다이얼로그
-// ------------------------------------------------------------------------
 class MonthlyCalendarDialog extends StatefulWidget {
   final DateTime focusedDay;
   final Function(DateTime) onDaySelected;
@@ -43,11 +42,11 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TableCalendar(
-              locale: 'ko_KR',
+              locale: AppStrings.localeKo,
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _focusedDay,
-              currentDay: DateTime.now(), // 오늘 날짜 표시
+              currentDay: DateTime.now(),
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               headerStyle: const HeaderStyle(
                 titleCentered: true,
@@ -55,18 +54,18 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
               ),
               calendarStyle: CalendarStyle(
                 selectedDecoration: const BoxDecoration(
-                  color: Colors.blue,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(77), // withOpacity(0.3)
+                  color: AppColors.primary.withAlpha(77),
                   shape: BoxShape.circle,
                 ),
               ),
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
-                  _focusedDay = focusedDay; // 달력 페이지 유지를 위해 필요
+                  _focusedDay = focusedDay;
                 });
                 widget.onDaySelected(selectedDay);
                 Navigator.pop(context);
@@ -83,7 +82,6 @@ class _MonthlyCalendarDialogState extends State<MonthlyCalendarDialog> {
   }
 }
 
-// 2. 주간 시간표 다이얼로그
 class WeeklyTimetableDialog extends StatefulWidget {
   final DateTime selectedDate;
 
@@ -103,7 +101,6 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
   @override
   void initState() {
     super.initState();
-    // 선택된 날짜가 속한 주의 일요일 구하기
     _sunday = widget.selectedDate.subtract(Duration(days: widget.selectedDate.weekday % 7));
     _fetchWeeklyData();
   }
@@ -111,7 +108,6 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
   Future<void> _fetchWeeklyData() async {
     final saturday = _sunday.add(const Duration(days: 6));
     
-    // Repository를 통해 데이터 가져오기
     final schedules = await _scheduleRepo.getWeeklySchedules(_sunday, saturday);
 
     if (mounted) {
@@ -136,21 +132,18 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
         height: 600,
         child: Column(
           children: [
-            // 헤더
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('주간 시간표', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('주간 시간표', style: AppTextStyles.h3),
                 IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
               ],
             ),
             const SizedBox(height: 10),
             
-            // 로딩 중일 때 표시
             if (_isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             else ...[
-              // 요일 헤더
               Row(
                 children: [
                   const SizedBox(width: 40),
@@ -162,15 +155,15 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color: isToday ? Colors.blue[50] : null,
+                          color: isToday ? AppColors.primaryLight : null,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Column(
                           children: [
-                            Text(DateFormat('E', 'ko_KR').format(day), 
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: index == 0 ? Colors.red : Colors.black)),
-                            Text(DateFormat('dd').format(day), 
-                              style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                            Text(DateFormat(AppStrings.dateFormatE, AppStrings.localeKo).format(day), 
+                              style: AppTextStyles.button.copyWith(fontSize: 12, color: index == 0 ? AppColors.danger : AppColors.black)),
+                            Text(DateFormat(AppStrings.dateFormatd).format(day), 
+                              style: AppTextStyles.caption),
                           ],
                         ),
                       ),
@@ -180,7 +173,6 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
               ),
               const Divider(height: 1),
 
-              // 시간표 바디
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -189,26 +181,23 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                       
                       return Container(
                         height: 60,
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: AppColors.disabled)),
                         ),
                         child: Row(
                           children: [
-                            // 시간
                             SizedBox(
                               width: 40,
                               child: Text(
                                 '$currentHour:00',
-                                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                style: AppTextStyles.caption,
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            // 셀
                             ...List.generate(7, (dayIndex) {
                               final cellDate = _sunday.add(Duration(days: dayIndex));
-                              final cellDateStr = DateFormat('yyyy-MM-dd').format(cellDate);
+                              final cellDateStr = DateFormat(AppStrings.dateFormatYmd).format(cellDate);
                               
-                              // [수정] _weeklySchedules 리스트에서 매칭 (mock 데이터 직접 접근 X)
                               final schedule = _weeklySchedules.firstWhere(
                                 (s) {
                                   final sHour = int.tryParse(s.startTime.split(':')[0]) ?? -1;
@@ -223,7 +212,7 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                                 child: Container(
                                   margin: const EdgeInsets.all(1),
                                   decoration: BoxDecoration(
-                                    color: hasSchedule ? Colors.blue[100] : null,
+                                    color: hasSchedule ? AppColors.primaryLight : null,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: hasSchedule
@@ -232,12 +221,12 @@ class _WeeklyTimetableDialogState extends State<WeeklyTimetableDialog> {
                                           children: [
                                             Text(
                                               schedule.memberName,
-                                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             Text(
                                               schedule.startTime,
-                                              style: const TextStyle(fontSize: 9),
+                                              style: AppTextStyles.caption.copyWith(fontSize: 9),
                                             ),
                                           ],
                                         )

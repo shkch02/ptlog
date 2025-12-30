@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ptlog/constants/app_colors.dart';
 import '../repositories/auth_repository.dart';
 import 'layout_screen.dart'; // 로그인 성공 시 이동할 화면 import
 
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue[50]!, Colors.indigo[100]!],
+            colors: [AppColors.primaryLight, AppColors.accentLight],
           ),
         ),
         child: Center(
@@ -86,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 64,
                           height: 64,
                           decoration: const BoxDecoration(
-                            color: Colors.blue,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.fitness_center, color: Colors.white, size: 32),
+                          child: const Icon(Icons.fitness_center, color: AppColors.white, size: 32),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -97,17 +98,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        const Text('회원 관리 시스템', style: TextStyle(color: Colors.grey)),
+                        const Text('회원 관리 시스템', style: TextStyle(color: AppColors.textLight)),
                         const SizedBox(height: 32),
                         
                         // 카카오 로그인 버튼
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            icon: const Icon(Icons.chat_bubble, color: Colors.black87, size: 20),
-                            label: const Text('카카오 로그인', style: TextStyle(color: Colors.black87)),
+                            icon: const Icon(Icons.chat_bubble, color: AppColors.textPrimary, size: 20),
+                            label: const Text('카카오 로그인', style: TextStyle(color: AppColors.textPrimary)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFE812),
+                              backgroundColor: AppColors.kakaoYellow,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
@@ -121,10 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            icon: const Icon(Icons.g_mobiledata, color: Colors.black87, size: 20),
-                            label: const Text('구글 로그인', style: TextStyle(color: Colors.black87)),
+                            icon: const Icon(Icons.g_mobiledata, color: AppColors.textPrimary, size: 20),
+                            label: const Text('구글 로그인', style: TextStyle(color: AppColors.textPrimary)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
+                              backgroundColor: AppColors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
@@ -133,8 +134,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const Text('※ 데모 버전입니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        const Text('실제 로그인 기능은 백엔드 연동이 필요합니다', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const Text('※ 데모 버전입니다', style: TextStyle(fontSize: 12, color: AppColors.textLight)),
+                        const Text('실제 로그인 기능은 백엔드 연동이 필요합니다', style: TextStyle(fontSize: 12, color: AppColors.textLight)),
                       ],
                     ),
                   ),

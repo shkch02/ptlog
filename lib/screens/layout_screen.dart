@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ptlog/constants/app_colors.dart';
 import 'member_list_screen.dart';
 import 'schedule_view_screen.dart';
 import 'home_screen.dart';
@@ -54,10 +55,10 @@ class _LayoutScreenState extends State<LayoutScreen> {
         height: 72,
         child: FloatingActionButton(
           onPressed: () => _onItemTapped(1),
-          backgroundColor: _selectedIndex == 1 ? Colors.blue[700] : Colors.blue,
+          backgroundColor: AppColors.primary,
           elevation: 4,
           shape: const CircleBorder(),
-          child: const Icon(LucideIcons.home, size: 32, color: Colors.white),
+          child: const Icon(LucideIcons.home, size: 32, color: AppColors.white),
         ),
       ),
       
@@ -68,7 +69,7 @@ class _LayoutScreenState extends State<LayoutScreen> {
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         height: 80,
-        color: Colors.white,
+        color: AppColors.white,
         padding: EdgeInsets.zero,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -109,14 +110,14 @@ class _LayoutScreenState extends State<LayoutScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.blue : Colors.grey,
+                color: isSelected ? AppColors.primary : AppColors.textLight,
                 size: 26,
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.blue : Colors.grey,
+                  color: isSelected ? AppColors.primary : AppColors.textLight,
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),

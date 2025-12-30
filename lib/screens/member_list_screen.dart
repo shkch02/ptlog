@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ptlog/constants/app_colors.dart';
+import 'package:ptlog/constants/app_text_styles.dart';
 import '../repositories/member_repository.dart';
 import '../models/index.dart'; 
 import '../widgets/member_detail_dialog.dart';
@@ -14,10 +16,7 @@ class MemberListScreen extends StatefulWidget {
 class _MemberListScreenState extends State<MemberListScreen> {
   final MemberRepository _memberRepo = MemberRepository();
   
-  // [수정 1] 데이터 변수
   List<Member> _members = []; 
-  
-  // [수정 2] 검색어 변수 추가 (이게 없어서 에러 났음)
   String _searchQuery = ''; 
 
   @override
@@ -35,7 +34,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
     }
   }
 
-  // [수정 3] 상세 정보 팝업 띄우는 함수 추가 (이게 없어서 에러 났음)
   void _showMemberDetail(BuildContext context, Member member) {
     showDialog(
       context: context,
@@ -45,7 +43,6 @@ class _MemberListScreenState extends State<MemberListScreen> {
   
   @override
   Widget build(BuildContext context) {
-    // [수정 4] _members와 _searchQuery 변수명 정확히 사용
     final filteredMembers = _members.where((member) =>
       member.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
       member.phone.contains(_searchQuery) ||
@@ -63,9 +60,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('회원 관리', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  // [수정] _members 사용
-                  Text('총 ${_members.length}명', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                  const Text('회원 관리', style: AppTextStyles.h2),
+                  Text('총 ${_members.length}명', style: AppTextStyles.subtitle2),
                 ],
               ),
               FilledButton.icon(
@@ -81,21 +77,20 @@ class _MemberListScreenState extends State<MemberListScreen> {
           
           // 2. 검색 바
           TextField(
-            // [수정] _searchQuery 사용
             onChanged: (value) => setState(() => _searchQuery = value),
             decoration: InputDecoration(
               hintText: '이름, 전화번호 검색...',
-              prefixIcon: const Icon(LucideIcons.search, color: Colors.grey),
+              prefixIcon: const Icon(LucideIcons.search, color: AppColors.textLight),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: const BorderSide(color: AppColors.disabled),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: const BorderSide(color: AppColors.disabled),
               ),
             ),
           ),
@@ -122,12 +117,11 @@ class _MemberListScreenState extends State<MemberListScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey[200]!),
+        side: const BorderSide(color: AppColors.disabled),
       ),
       margin: const EdgeInsets.only(bottom: 12),
-      color: Colors.white,
+      color: AppColors.white,
       child: InkWell(
-        // [수정] 함수 연결 완료
         onTap: () => _showMemberDetail(context, member), 
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -149,13 +143,13 @@ class _MemberListScreenState extends State<MemberListScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(member.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text(member.name, style: AppTextStyles.subtitle1),
                         const SizedBox(height: 4),
                         _buildSessionBadge(member.remainingSessions, member.totalSessions),
                       ],
                     ),
                   ),
-                  const Icon(LucideIcons.chevronRight, color: Colors.grey),
+                  const Icon(LucideIcons.chevronRight, color: AppColors.textLight),
                 ],
               ),
               const SizedBox(height: 12),
@@ -173,14 +167,14 @@ class _MemberListScreenState extends State<MemberListScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.amber[50],
+                    color: AppColors.warningLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.alertCircle, size: 16, color: Colors.amber[900]),
+                      const Icon(LucideIcons.alertCircle, size: 16, color: AppColors.warning),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(member.notes, style: TextStyle(fontSize: 12, color: Colors.amber[900]), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(member.notes, style: AppTextStyles.caption.copyWith(color: AppColors.warning), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ],
                   ),
                 ),
@@ -195,27 +189,27 @@ class _MemberListScreenState extends State<MemberListScreen> {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
+        Icon(icon, size: 14, color: AppColors.textSecondary),
         const SizedBox(width: 8),
-        Text(text, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+        Text(text, style: AppTextStyles.subtitle2),
       ],
     );
   }
 
   Widget _buildSessionBadge(int remaining, int total) {
-    final ratio = total == 0 ? 0 : remaining / total; // 0으로 나누기 방지
-    Color color = Colors.grey;
-    Color bgColor = Colors.grey[100]!;
+    final ratio = total == 0 ? 0 : remaining / total;
+    Color color = AppColors.textLight;
+    Color bgColor = AppColors.background;
     
     if (ratio <= 0.2) {
-      color = Colors.red;
-      bgColor = Colors.red[50]!;
+      color = AppColors.danger;
+      bgColor = AppColors.dangerLight;
     } else if (ratio <= 0.5) {
-      color = Colors.black;
-      bgColor = Colors.grey[200]!;
+      color = AppColors.black;
+      bgColor = AppColors.disabled;
     } else {
-      color = Colors.blue[900]!;
-      bgColor = Colors.blue[50]!;
+      color = AppColors.primary;
+      bgColor = AppColors.primaryLight;
     }
 
     return Container(
@@ -226,10 +220,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
       ),
       child: Text(
         '$remaining/$total 회 남음',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+        style: AppTextStyles.button.copyWith(fontSize: 12, color: color),
       ),
     );
   }
 }
-
-

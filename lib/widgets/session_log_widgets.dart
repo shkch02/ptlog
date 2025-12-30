@@ -1,11 +1,9 @@
-// lib/widgets/session_log_widgets.dart
-
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../models/index.dart'; // Schedule
-import '../models/session_form.dart'; // ExerciseForm, SetForm
+import 'package:ptlog/constants/app_colors.dart';
+import 'package:ptlog/constants/app_text_styles.dart';
+import '../models/index.dart';
 
-// 1. 헤더 위젯
 class SessionLogHeader extends StatelessWidget {
   final Schedule schedule;
 
@@ -16,7 +14,7 @@ class SessionLogHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -25,39 +23,38 @@ class SessionLogHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(schedule.date, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+              Text(schedule.date, style: AppTextStyles.subtitle2),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Text(schedule.memberName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(schedule.memberName, style: AppTextStyles.h3),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text('15회차', style: TextStyle(fontSize: 12, color: Colors.blue[800], fontWeight: FontWeight.bold)),
+                    child: Text('15회차', style: AppTextStyles.button.copyWith(fontSize: 12, color: AppColors.primary)),
                   ),
                 ],
               ),
             ],
           ),
-          const Icon(LucideIcons.calendarCheck, size: 32, color: Colors.blue),
+          const Icon(LucideIcons.calendarCheck, size: 32, color: AppColors.primary),
         ],
       ),
     );
   }
 }
 
-// 2. 운동 카드 위젯
 class ExerciseCard extends StatelessWidget {
   final int index;
   final ExerciseForm exercise;
   final VoidCallback onRemove;
   final VoidCallback onAddSet;
   final Function(int) onRemoveSet;
-  final bool showRemoveButton; // 최소 1개일 때 삭제 버튼 숨김용
+  final bool showRemoveButton;
 
   const ExerciseCard({
     super.key,
@@ -73,33 +70,30 @@ class ExerciseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.disabled),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 8, offset: const Offset(0, 4)) // withOpacity(0.03)
+          BoxShadow(color: AppColors.black.withAlpha(8), blurRadius: 8, offset: const Offset(0, 4))
         ],
       ),
       child: Column(
         children: [
-          // 상단: 타이틀 + 삭제 버튼
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('운동 ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('운동 ${index + 1}', style: AppTextStyles.subtitle1),
                 if (showRemoveButton)
                   IconButton(
-                    icon: const Icon(LucideIcons.trash2, size: 18, color: Colors.red),
+                    icon: const Icon(LucideIcons.trash2, size: 18, color: AppColors.danger),
                     onPressed: onRemove,
                     visualDensity: VisualDensity.compact,
                   ),
               ],
             ),
           ),
-
-          // 운동 정보 입력
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -116,8 +110,6 @@ class ExerciseCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // 사진 슬롯
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -128,25 +120,20 @@ class ExerciseCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // 세트 헤더
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              children: const [
-                SizedBox(width: 32, child: Center(child: Text('SET', style: TextStyle(fontSize: 11, color: Colors.grey)))),
-                Expanded(child: Center(child: Text('kg', style: TextStyle(fontSize: 11, color: Colors.grey)))),
-                Expanded(child: Center(child: Text('회', style: TextStyle(fontSize: 11, color: Colors.grey)))),
-                Expanded(child: Center(child: Text('휴식', style: TextStyle(fontSize: 11, color: Colors.grey)))),
-                SizedBox(width: 32),
+              children: [
+                SizedBox(width: 32, child: Center(child: Text('SET', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
+                Expanded(child: Center(child: Text('kg', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
+                Expanded(child: Center(child: Text('회', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
+                Expanded(child: Center(child: Text('휴식', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
+                const SizedBox(width: 32),
               ],
             ),
           ),
           const SizedBox(height: 8),
-
-          // 세트 리스트
           ...exercise.sets.asMap().entries.map((entry) {
             return _SetRow(
               index: entry.key,
@@ -154,20 +141,18 @@ class ExerciseCard extends StatelessWidget {
               showRemoveButton: exercise.sets.length > 1,
             );
           }),
-
-          // 세트 추가 버튼
           InkWell(
             onTap: onAddSet,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[100]!))),
+              decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.background))),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(LucideIcons.plus, size: 14, color: Colors.blue),
-                  SizedBox(width: 4),
-                  Text('세트 추가', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 13)),
+                children: [
+                  const Icon(LucideIcons.plus, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 4),
+                  Text('세트 추가', style: AppTextStyles.button.copyWith(color: AppColors.primary, fontSize: 13)),
                 ],
               ),
             ),
@@ -178,7 +163,6 @@ class ExerciseCard extends StatelessWidget {
   }
 }
 
-// 3. 피드백 및 메모 입력 위젯
 class SessionTextInput extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -203,7 +187,7 @@ class SessionTextInput extends StatelessWidget {
         Row(children: [
           Icon(icon, size: 18),
           const SizedBox(width: 8),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+          Text(title, style: AppTextStyles.subtitle1)
         ]),
         const SizedBox(height: 12),
         TextField(
@@ -218,8 +202,6 @@ class SessionTextInput extends StatelessWidget {
     );
   }
 }
-
-// --- 내부 사용 작은 위젯들 (Private) ---
 
 class _SimpleTextField extends StatelessWidget {
   final String label;
@@ -236,7 +218,7 @@ class _SimpleTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: AppColors.background,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
       ),
@@ -259,7 +241,7 @@ class _SetRow extends StatelessWidget {
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.disabled)),
         ),
       ),
     );
@@ -276,8 +258,8 @@ class _SetRow extends StatelessWidget {
             child: Center(
               child: Container(
                 width: 24, height: 24,
-                decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
-                child: Center(child: Text('${index + 1}', style: TextStyle(fontSize: 12, color: Colors.blue[800], fontWeight: FontWeight.bold))),
+                decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+                child: Center(child: Text('${index + 1}', style: AppTextStyles.button.copyWith(fontSize: 12, color: AppColors.primary))),
               ),
             ),
           ),
@@ -290,7 +272,7 @@ class _SetRow extends StatelessWidget {
             width: 32,
             child: showRemoveButton
                 ? IconButton(
-                    icon: const Icon(LucideIcons.x, size: 16, color: Colors.grey),
+                    icon: const Icon(LucideIcons.x, size: 16, color: AppColors.textLight),
                     onPressed: onRemove,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -309,17 +291,15 @@ class _PhotoSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // TODO: 이미지 피커
-      },
+      onTap: () {},
       child: Container(
         width: 64, height: 64,
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
+          border: Border.all(color: AppColors.disabled),
         ),
-        child: const Center(child: Icon(LucideIcons.camera, color: Colors.grey, size: 20)),
+        child: const Center(child: Icon(LucideIcons.camera, color: AppColors.textLight, size: 20)),
       ),
     );
   }

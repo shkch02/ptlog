@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
-//import '../data/mock_data.dart';
+import 'package:ptlog/constants/app_colors.dart';
+import 'package:ptlog/constants/app_strings.dart';
+import 'package:ptlog/constants/app_text_styles.dart';
 import '../models/index.dart';
 import '../repositories/schedule_repository.dart'; 
 import '../repositories/member_repository.dart'; 
@@ -19,14 +21,12 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
   late TabController _tabController;
   late TextEditingController _notesController;
   
-  // Repository 인스턴스
   final ScheduleRepository _scheduleRepo = ScheduleRepository();
   final MemberRepository _memberRepo = MemberRepository();
 
-  // 데이터 담을 변수
   List<Schedule> _memberSchedules = [];
   List<PaymentLog> _memberPayments = [];
-  bool _isLoading = true; // 로딩 상태
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -34,7 +34,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     _tabController = TabController(length: 4, vsync: this);
     _notesController = TextEditingController(text: widget.member.notes);
     
-    // 데이터 로딩 시작
     _loadAsyncData();
   }
 
@@ -48,7 +47,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
       setState(() {
         _memberSchedules = results[0] as List<Schedule>;
         _memberPayments = results[1] as List<PaymentLog>;
-        _isLoading = false; // 로딩 완료
+        _isLoading = false;
       });
     }
   }
@@ -69,7 +68,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 팝업 헤더 (여기는 member 정보가 이미 있어서 바로 그림)
             Row(
               children: [
                 CircleAvatar(
@@ -85,13 +83,13 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                     children: [
                       Row(
                         children: [
-                          Text(widget.member.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text(widget.member.name, style: AppTextStyles.h2),
                           const SizedBox(width: 8),
                           _buildSessionBadge(widget.member.remainingSessions, widget.member.totalSessions),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(widget.member.phone, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                      Text(widget.member.phone, style: AppTextStyles.subtitle2),
                     ],
                   ),
                 ),
@@ -99,13 +97,12 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
             ),
             const SizedBox(height: 20),
             
-            // 탭 바
             TabBar(
               controller: _tabController,
-              labelColor: Colors.blue,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.blue,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textLight,
+              indicatorColor: AppColors.primary,
+              labelStyle: AppTextStyles.button.copyWith(fontSize: 13),
               tabs: const [
                 Tab(text: 'PT세션'),
                 Tab(text: '기본정보'),
@@ -115,7 +112,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
             ),
             const SizedBox(height: 16),
 
-            // 탭 내용물 (로딩 중이면 로딩 표시)
             Expanded(
               child: _isLoading 
                   ? const Center(child: CircularProgressIndicator()) 
@@ -130,7 +126,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                     ),
             ),
             
-            // 닫기 버튼
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -144,36 +139,29 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     );
   }
 
-  // ----------------------------------------------------------------------
-  // 탭 1: PT 세션
-  // ----------------------------------------------------------------------
   Widget _buildPTSessionsTab() {
     if (_memberSchedules.isEmpty) {
       return const Center(child: Text('예약된 스케줄이 없습니다.'));
     }
-    // ... (기존과 동일)
     final now = DateTime.now();
     return ListView.builder(
       itemCount: _memberSchedules.length,
       itemBuilder: (context, index) {
         final schedule = _memberSchedules[index];
-        // ... (나머지 동일)
         DateTime scheduleTime;
         try {
-          scheduleTime = DateFormat('yyyy-MM-dd HH:mm').parse('${schedule.date} ${schedule.startTime}');
+          scheduleTime = DateFormat(AppStrings.dateFormatYmdHm).parse('${schedule.date} ${schedule.startTime}');
         } catch (e) {
           scheduleTime = now;
         }
         final isPast = scheduleTime.isBefore(now);
-        // ... (UI 리턴 부분 동일)
         return Container(
-          // ... (스타일)
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: BoxDecoration(
-            color: isPast ? Colors.grey[100] : Colors.white,
+            color: isPast ? AppColors.background : AppColors.white,
             borderRadius: BorderRadius.circular(12),
-            border: isPast ? Border.all(color: Colors.grey[300]!) : Border.all(color: Colors.blue[100]!, width: 1.5),
+            border: Border.all(color: isPast ? AppColors.disabled : AppColors.primaryLight, width: isPast ? 1 : 1.5),
           ),
           child: Row(
             children: [
@@ -183,18 +171,15 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                   children: [
                     Text(
                       '${schedule.date} ${schedule.startTime}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: isPast ? Colors.grey[600] : Colors.black87,
+                      style: AppTextStyles.subtitle1.copyWith(
+                        color: isPast ? AppColors.textSecondary : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       isPast ? '완료' : (schedule.notes.isNotEmpty ? schedule.notes : '예약됨'),
-                      style: TextStyle(
-                        fontSize: 12, 
-                        color: isPast ? Colors.grey : Colors.blue[800],
+                      style: AppTextStyles.caption.copyWith(
+                        color: isPast ? AppColors.textLight : AppColors.primary,
                         fontWeight: isPast ? FontWeight.normal : FontWeight.w600
                       ),
                     ),
@@ -205,12 +190,12 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('보고서 기능 준비중')));
                 },
-                icon: Icon(LucideIcons.fileText, size: 14, color: isPast ? Colors.grey[600] : Colors.blue),
-                label: Text('운동기록', style: TextStyle(fontSize: 12, color: isPast ? Colors.grey[600] : Colors.blue)),
+                icon: Icon(LucideIcons.fileText, size: 14, color: isPast ? AppColors.textSecondary : AppColors.primary),
+                label: Text('운동기록', style: AppTextStyles.caption.copyWith(color: isPast ? AppColors.textSecondary : AppColors.primary)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                   minimumSize: const Size(0, 32),
-                  side: BorderSide(color: isPast ? Colors.grey[400]! : Colors.blue),
+                  side: BorderSide(color: isPast ? AppColors.disabledText : AppColors.primary),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
@@ -221,9 +206,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     );
   }
 
-  // ----------------------------------------------------------------------
-  // 탭 2: 기본 정보
-  // ----------------------------------------------------------------------
   Widget _buildBasicInfoTab() {
     return SingleChildScrollView(
       child: Column(
@@ -232,7 +214,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           _buildSectionTitle('인적사항'),
           Card(
             elevation: 0,
-            color: Colors.grey[50],
+            color: AppColors.background,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -254,10 +236,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8.0, left: 4),
-                child: Text('신체 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
+              _buildSectionTitle('신체 정보'),
               FilledButton.tonalIcon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('InBody 데이터 연동 중...')));
@@ -267,15 +246,15 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: const Size(0, 32),
-                  backgroundColor: Colors.blue[50],
-                  foregroundColor: Colors.blue[700],
+                  backgroundColor: AppColors.primaryLight,
+                  foregroundColor: AppColors.primary,
                 ),
               ),
             ],
           ),
           Card(
             elevation: 0,
-            color: Colors.grey[50],
+            color: AppColors.background,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -307,21 +286,21 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 4),
-      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(title, style: AppTextStyles.subtitle1),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icon, size: 16, color: AppColors.textSecondary),
         const SizedBox(width: 12),
         SizedBox(
           width: 90, 
-          child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          child: Text(label, style: AppTextStyles.subtitle2),
         ),
         Expanded(
-          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14), textAlign: TextAlign.right),
+          child: Text(value, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500), textAlign: TextAlign.right),
         ),
       ],
     );
@@ -329,18 +308,18 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
 
   Widget _buildSessionBadge(int remaining, int total) {
     final ratio = remaining / total;
-    Color color = Colors.grey;
-    Color bgColor = Colors.grey[100]!;
+    Color color = AppColors.textLight;
+    Color bgColor = AppColors.background;
     
     if (ratio <= 0.2) {
-      color = Colors.red;
-      bgColor = Colors.red[50]!;
+      color = AppColors.danger;
+      bgColor = AppColors.dangerLight;
     } else if (ratio <= 0.5) {
-      color = Colors.black;
-      bgColor = Colors.grey[200]!;
+      color = AppColors.black;
+      bgColor = AppColors.disabled;
     } else {
-      color = Colors.blue[900]!;
-      bgColor = Colors.blue[50]!;
+      color = AppColors.primary;
+      bgColor = AppColors.primaryLight;
     }
 
     return Container(
@@ -351,12 +330,11 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
       ),
       child: Text(
         '$remaining/$total 회',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+        style: AppTextStyles.button.copyWith(fontSize: 12, color: color),
       ),
     );
   }
 
-  // 탭 3: 상세 메모
   Widget _buildDetailedMemoTab() {
     return SingleChildScrollView(
       child: Column(
@@ -365,15 +343,15 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber[50],
+              color: AppColors.warningLight,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber[100]!),
+              border: Border.all(color: AppColors.warningLight),
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.info, size: 16, color: Colors.amber[900]),
+                const Icon(LucideIcons.info, size: 16, color: AppColors.warning),
                 const SizedBox(width: 8),
-                Expanded(child: Text('회원의 특이사항, 부상 이력 등을 기록하세요.', style: TextStyle(fontSize: 12, color: Colors.amber[900]))),
+                Expanded(child: Text('회원의 특이사항, 부상 이력 등을 기록하세요.', style: AppTextStyles.caption.copyWith(color: AppColors.warning))),
               ],
             ),
           ),
@@ -385,7 +363,7 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               hintText: '내용을 입력하세요...',
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
             ),
           ),
           const SizedBox(height: 16),
@@ -406,7 +384,6 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
     );
   }
 
-  // 탭 4: 결제
   Widget _buildPaymentTab() {
     if (_memberPayments.isEmpty) {
       return const Center(child: Text('결제/연동 이력이 없습니다.'));
@@ -421,18 +398,18 @@ class _MemberDetailDialogState extends State<MemberDetailDialog> with SingleTick
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: log.type == 'CRM연동' ? Colors.green[100] : Colors.blue[100],
+              color: log.type == 'CRM연동' ? AppColors.successLight : AppColors.primaryLight,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               log.type == 'CRM연동' ? LucideIcons.link : LucideIcons.creditCard,
               size: 16,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
-          title: Text(log.type, style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(log.type, style: AppTextStyles.button),
           subtitle: Text('${log.date} | ${log.content}'),
-          trailing: Text(log.amount, style: const TextStyle(fontWeight: FontWeight.bold)),
+          trailing: Text(log.amount, style: AppTextStyles.button),
         );
       },
     );

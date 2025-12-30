@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ptlog/constants/app_dimensions.dart';
+import 'package:ptlog/constants/app_text_styles.dart';
 import '../models/index.dart';
 import '../repositories/schedule_repository.dart'; // Repository import
 import '../repositories/member_repository.dart';   // Repository import
@@ -80,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppDimensions.paddingLarge),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -108,10 +110,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Center(
             child: TextButton(
               onPressed: widget.onGoToSchedule,
-              child: const Text('전체 스케줄 확인하러 가기', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              child: const Text('전체 스케줄 확인하러 가기', style: AppTextStyles.caption),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppDimensions.gapLarge),
           RenewalNeededSection(members: _renewalMembers),
         ],
       ),

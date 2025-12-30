@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/index.dart'; // Schedule
-import '../models/session_form.dart'; // 모델 import
 import '../widgets/session_log_widgets.dart'; // 분리한 위젯 import
 
 class SessionLogScreen extends StatefulWidget {

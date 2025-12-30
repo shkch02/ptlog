@@ -20,4 +20,17 @@ class MemberRepository {
     // mockPaymentLogs는 mock_data.dart에 있다고 가정
     return mockPaymentLogs.where((p) => p.memberId == memberId).toList();
   }
+
+  // 회원 메모 업데이트
+  Future<void> updateMemberNotes(String memberId, String newNotes) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    
+    final index = mockMembers.indexWhere((m) => m.id == memberId);
+    if (index != -1) {
+      // copyWith를 사용하여 새로운 객체 생성
+      final updatedMember = mockMembers[index].copyWith(notes: newNotes);
+      // 리스트에서 해당 멤버 교체
+      mockMembers[index] = updatedMember;
+    }
+  }
 }

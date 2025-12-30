@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷팅 초기화용 (필요시)
+import 'package:ptlog/constants/app_colors.dart';
 import 'screens/login_screen.dart';
 
 void main() async {
@@ -20,8 +21,8 @@ class PtTrainerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // 디버그 띠 제거
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        scaffoldBackgroundColor: Colors.grey[50], // 앱 전체 배경색 설정
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+        scaffoldBackgroundColor: AppColors.background, // 앱 전체 배경색 설정
         fontFamily: 'Pretendard', // (만약 폰트 적용했다면)
       ),
       // [수정] AppContainer 없이 바로 로그인 화면으로 시작!
