@@ -6,7 +6,7 @@ pipeline {
         HARBOR_URL       = "shkch.duckdns.org"
         HARBOR_PROJECT   = "ptlog"      // Harbor 프로젝트 명 (필요시 수정)
         HARBOR_CREDS_ID  = "harbor-creds"
-        IMAGE_NAME       = "ptlog"          // ptlog 이미지 이름
+        IMAGE_NAME       = "ptlog-web"          // ptlog 이미지 이름
         
         // 2. Kubernetes 배포 정보
         KUBE_CREDS_ID    = "kubeconfig-creds"
