@@ -27,9 +27,10 @@ metadata:
   name: ptlog-web-svc
   namespace: default
 spec:
-  type: ClusterIP
+  type: NodePort #ClusterIP
   selector:
     app: ptlog-web
   ports:
     - port: 80
       targetPort: 80
+      nodePort: 30081 
