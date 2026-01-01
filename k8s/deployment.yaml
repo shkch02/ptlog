@@ -27,10 +27,9 @@ metadata:
   name: ptlog-web-svc
   namespace: default
 spec:
-  type: NodePort # 외부 노출 시 NodePort 또는 Ingress 사용 권장
+  type: ClusterIP
   selector:
     app: ptlog-web
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30081 # 원하는 NodePort 지정 (30000-32767 범위)
