@@ -7,7 +7,7 @@ import 'package:ptlog/widgets/member_detail_tabs/basic_info_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/detailed_memo_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/payment_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/pt_sessions_tab.dart';
-import '../models/index.dart';
+import 'package:ptlog/models/index.dart';
 
 class MemberDetailDialog extends ConsumerStatefulWidget {
   final Member member;
@@ -23,7 +23,7 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
   late TabController _tabController;
   late TextEditingController _notesController;
 
-  List<Schedule> _memberSchedules = [];
+  // [수정] 스케줄 리스트 변수 삭제 (_memberSchedules 불필요)
   List<PaymentLog> _memberPayments = [];
   bool _isLoading = true;
 
@@ -37,18 +37,15 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
   }
 
   Future<void> _loadAsyncData() async {
-    final scheduleRepo = ref.read(scheduleRepositoryProvider);
+    // [수정] 스케줄 리포지토리 호출 불필요
     final memberRepo = ref.read(memberRepositoryProvider);
 
-    final results = await Future.wait([
-      scheduleRepo.getSchedulesByMember(widget.member.id),
-      memberRepo.getPaymentHistory(widget.member.id),
-    ]);
+    // [수정] 결제 내역만 로드하도록 변경 (스케줄은 PtSessionsTab 내부에서 로드함)
+    final payments = await memberRepo.getPaymentHistory(widget.member.id);
   
     if (mounted) {
       setState(() {
-        _memberSchedules = results[0] as List<Schedule>;
-        _memberPayments = results[1] as List<PaymentLog>;
+        _memberPayments = payments; // 결과 할당
         _isLoading = false;
       });
     }
@@ -124,7 +121,9 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
                   : TabBarView(
                       controller: _tabController,
                       children: [
-                        PtSessionsTab(memberSchedules: _memberSchedules),
+                        // [수정] memberSchedules 대신 member 객체를 직접 전달
+                        PtSessionsTab(member: widget.member),
+                        
                         BasicInfoTab(member: widget.member),
                         DetailedMemoTab(
                           notesController: _notesController,
@@ -148,7 +147,9 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
     );
   }
 
+  // ... ( _buildSessionBadge 메서드는 기존과 동일 )
   Widget _buildSessionBadge(int remaining, int total) {
+    // 기존 코드 유지
     final ratio = total > 0 ? remaining / total : 0.0;
     Color color = AppColors.textLight;
     Color bgColor = AppColors.background;

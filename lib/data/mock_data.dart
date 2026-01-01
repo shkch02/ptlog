@@ -396,8 +396,8 @@ List<Schedule> mockSchedules = [
     memberId: '1',
     memberName: '김민수',
     date: DateTime.now().toString().split(' ')[0], // 오늘
-    startTime: '1:00',
-    endTime: '2:00',
+    startTime: '01:00',
+    endTime: '02:00',
     notes: '허리 디스크 병력 있음. 데드리프트 중량 치지 말 것',
     reminder: '10분 전 알림',
   ),
@@ -446,7 +446,7 @@ List<WorkoutLog> mockWorkoutLogs = [
     id: 'log_1',
     memberId: '1', // 김민수
     memberName: '김민수',
-    date: DateTime.now().subtract(const Duration(days: 2)).toString().split(' ')[0], // 위 스케줄 날짜와 동일하게 설정
+    date: DateTime.now().toString().split(' ')[0],
     sessionNumber: 14,
     exercises: [
       WorkoutExercise(
