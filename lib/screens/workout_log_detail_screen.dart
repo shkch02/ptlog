@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
-import '../models/workout_log.dart';
+import '../models/index.dart';
 
 class WorkoutLogDetailScreen extends StatelessWidget {
   final WorkoutLog log;

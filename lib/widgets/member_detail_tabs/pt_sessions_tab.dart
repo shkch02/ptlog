@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. Riverpod import
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/models/index.dart';
+import 'package:ptlog/providers/repository_providers.dart'; // 2. Provider import
+import 'package:ptlog/screens/workout_log_detail_screen.dart'; // 상세 화면 import
 
-class PtSessionsTab extends StatelessWidget {
+// 3. ConsumerWidget으로 변경
+class PtSessionsTab extends ConsumerWidget {
   final List<Schedule> memberSchedules;
 
   const PtSessionsTab({super.key, required this.memberSchedules});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) { // 4. WidgetRef ref 파라미터 추가
     if (memberSchedules.isEmpty) {
       return const Center(child: Text('예약된 스케줄이 없습니다.'));
     }
@@ -30,6 +34,7 @@ class PtSessionsTab extends StatelessWidget {
           scheduleTime = now;
         }
         final isPast = scheduleTime.isBefore(now);
+        
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -70,29 +75,39 @@ class PtSessionsTab extends StatelessWidget {
                 ),
               ),
               OutlinedButton.icon(
-                onPressed: () {
+                // 5. 비동기 콜백으로 변경
+                onPressed: () async {
                   if (isPast) {
-                    // 1. 해당 날짜와 멤버 ID에 맞는 로그 찾기
                     try {
-                      final log = mockWorkoutLogs.firstWhere(
-                        (l) => l.memberId == schedule.memberId && l.date == schedule.date,
-                      );
-                      
-                      // 2. 찾으면 상세 화면으로 이동
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkoutLogDetailScreen(log: log),
-                        ),
-                      );
+                      // ★ 리포지토리 패턴 적용 부분 ★
+                      // Provider를 통해 Repository 인스턴스를 가져오고 메서드 호출
+                      final log = await ref
+                          .read(workoutLogRepositoryProvider)
+                          .getLogBySchedule(schedule.memberId, schedule.date);
+
+                      // 비동기 작업 후 context 마운트 여부 확인
+                      if (!context.mounted) return;
+
+                      if (log != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WorkoutLogDetailScreen(log: log),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('작성된 운동 일지가 없습니다.')),
+                        );
+                      }
                     } catch (e) {
-                      // 못 찾으면 (StateError)
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('작성된 운동 일지가 없습니다.')),
+                        const SnackBar(content: Text('오류가 발생했습니다.')),
                       );
                     }
                   } else {
-                    // 미래 일정인 경우 (수정/작성 기능 등으로 연결 가능)
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('수업 완료 후 작성할 수 있습니다.')),
                     );
@@ -101,7 +116,7 @@ class PtSessionsTab extends StatelessWidget {
                 icon: Icon(
                   LucideIcons.fileText,
                   size: 14,
-                  color: isPast ? AppColors.primary : AppColors.textSecondary, // 완료된 건 활성화 컬러로 변경 추천
+                  color: isPast ? AppColors.primary : AppColors.textSecondary,
                 ),
                 label: Text(
                   '운동기록',
@@ -110,12 +125,14 @@ class PtSessionsTab extends StatelessWidget {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                   minimumSize: const Size(0, 32),
                   side: BorderSide(
-                    color: isPast ? AppColors.primary : AppColors.disabled,
-                  ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      color:
+                          isPast ? AppColors.primary : AppColors.disabled),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ],

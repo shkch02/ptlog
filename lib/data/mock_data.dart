@@ -396,8 +396,8 @@ List<Schedule> mockSchedules = [
     memberId: '1',
     memberName: '김민수',
     date: DateTime.now().toString().split(' ')[0], // 오늘
-    startTime: '21:00',
-    endTime: '22:00',
+    startTime: '1:00',
+    endTime: '2:00',
     notes: '허리 디스크 병력 있음. 데드리프트 중량 치지 말 것',
     reminder: '10분 전 알림',
   ),
