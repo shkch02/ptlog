@@ -68,7 +68,7 @@ class _LayoutScreenState extends State<LayoutScreen> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
-        height: 80,
+        height: 60,
         color: AppColors.white,
         padding: EdgeInsets.zero,
         child: Row(
@@ -111,14 +111,14 @@ class _LayoutScreenState extends State<LayoutScreen> {
               Icon(
                 icon,
                 color: isSelected ? AppColors.primary : AppColors.textLight,
-                size: 26,
+                size: 20,//아이콘크기
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   color: isSelected ? AppColors.primary : AppColors.textLight,
-                  fontSize: 12,
+                  fontSize: 10,//아이콘 아래 텍스트 크기
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
