@@ -19,7 +19,7 @@ class MemberRepository {
     return mockMembers.where((m) => m.remainingSessions <= 3).toList();
   }
 
-  // [추가] 특정 회원의 결제 내역 가져오기
+  //  특정 회원의 결제 내역 가져오기
   Future<List<PaymentLog>> getPaymentHistory(String memberId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     // mockPaymentLogs는 mock_data.dart에 있다고 가정
@@ -41,5 +41,11 @@ class MemberRepository {
       ref.invalidate(allMembersProvider);
       ref.invalidate(renewalMembersProvider);
     }
+  }
+
+  //회원 추가 메서드
+  Future<void> addMember(Member member) async {
+    await Future.delayed(const Duration(milliseconds: 500)); // 저장하는 척 딜레이
+    mockMembers.add(member); // 실제 목업 리스트에 추가
   }
 }

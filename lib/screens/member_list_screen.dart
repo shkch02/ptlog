@@ -4,8 +4,11 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/providers/home_providers.dart';
+import 'package:ptlog/providers/repository_providers.dart';
 import '../models/index.dart';
+import '../repositories/member_repository.dart';
 import '../widgets/member_detail_dialog.dart';
+import '../widgets/member_add_dialog.dart';
 
 class MemberListScreen extends ConsumerStatefulWidget {
   const MemberListScreen({super.key});
@@ -22,6 +25,30 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       context: context,
       builder: (context) => MemberDetailDialog(member: member),
     );
+  }
+
+  //회원추가창 다이얼로그 호출 함수
+  void _showAddMemberDialog() async {
+    final Member? newMember = await showDialog<Member>(
+      context: context,
+      builder: (context) => const MemberAddDialog(),
+    );
+
+    if (newMember != null) {
+      // 1. 리포지토리를 통해 멤버 추가 (비동기)
+      // repositoryProviders.dart에 정의된 memberRepositoryProvider를 사용합니다.
+      await ref.read(memberRepositoryProvider).addMember(newMember);
+      
+      // 2. 리스트 새로고침 (Riverpod가 다시 로딩 -> 데이터 표시)
+      // invalidate를 사용하면 해당 프로바이더를 초기화하여 다시 읽어오게 합니다.
+      ref.invalidate(allMembersProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${newMember.name} 회원님이 등록되었습니다.')),
+        );
+      }
+    }
   }
 
   @override
@@ -55,9 +82,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
                     ],
                   ),
                   FilledButton.icon(
-                    onPressed: () {
-                      // TODO: 회원 추가 다이얼로그
-                    },
+                    onPressed: _showAddMemberDialog,
                     icon: const Icon(LucideIcons.plus, size: 16),
                     label: const Text('추가'),
                   ),
