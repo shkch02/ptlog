@@ -118,7 +118,7 @@ class _LayoutScreenState extends State<LayoutScreen> {
                 label,
                 style: TextStyle(
                   color: isSelected ? AppColors.primary : AppColors.textLight,
-                  fontSize: 10,//아이콘 아래 텍스트 크기
+                  fontSize: 12,//아이콘 아래 텍스트 크기
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
