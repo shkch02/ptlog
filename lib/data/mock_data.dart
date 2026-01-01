@@ -440,3 +440,37 @@ List<PaymentLog> mockPaymentLogs = [
   PaymentLog(id: 'p4', memberId: '11', date: '2025-01-02', type: 'PT결제', content: 'PT 30회 신규', amount: '1,500,000원'),
   PaymentLog(id: 'p5', memberId: '16', date: '2024-06-01', type: 'PT결제', content: 'PT 50회 신규', amount: '2,500,000원'),
 ];
+
+List<WorkoutLog> mockWorkoutLogs = [
+  WorkoutLog(
+    id: 'log_1',
+    memberId: '1', // 김민수
+    memberName: '김민수',
+    date: DateTime.now().subtract(const Duration(days: 2)).toString().split(' ')[0], // 위 스케줄 날짜와 동일하게 설정
+    sessionNumber: 14,
+    exercises: [
+      WorkoutExercise(
+        id: 'ex1',
+        name: '랫 풀 다운',
+        sets: [
+          WorkoutSet(setNumber: 1, reps: 15, weight: 40),
+          WorkoutSet(setNumber: 2, reps: 12, weight: 50),
+          WorkoutSet(setNumber: 3, reps: 10, weight: 60),
+        ],
+        notes: '견갑 움직임 좋음',
+      ),
+      WorkoutExercise(
+        id: 'ex2',
+        name: '시티드 로우',
+        sets: [
+          WorkoutSet(setNumber: 1, reps: 15, weight: 40),
+          WorkoutSet(setNumber: 2, reps: 15, weight: 45),
+        ],
+        notes: '허리 반동 주의 시킴',
+      ),
+    ],
+    overallNotes: '전반적인 컨디션 양호. 다음 시간 데드리프트 예정.',
+    reminderForNext: '스트랩 챙겨오기',
+    photos: [], 
+  ),
+];
