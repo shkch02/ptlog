@@ -25,19 +25,21 @@ class _PhysicalInfoEditDialogState extends State<PhysicalInfoEditDialog> {
   late TextEditingController _targetMuscleController;
   late TextEditingController _activityLevelController;
   late TextEditingController _sleepTimeController;
+  late TextEditingController _ageController; // age 컨트롤러 추가
 
   @override
   void initState() {
     super.initState();
-    // 기존 데이터로 초기화
-    _heightController = TextEditingController(text: widget.member.height);
-    _weightController = TextEditingController(text: widget.member.weight);
-    _targetWeightController = TextEditingController(text: widget.member.targetWeight);
-    _bodyFatController = TextEditingController(text: widget.member.bodyFat);
-    _skeletalMuscleController = TextEditingController(text: widget.member.skeletalMuscle);
-    _targetMuscleController = TextEditingController(text: widget.member.targetMuscle);
-    _activityLevelController = TextEditingController(text: widget.member.activityLevel);
-    _sleepTimeController = TextEditingController(text: widget.member.sleepTime);
+    // 기존 데이터로 초기화 (타입 변환)
+    _heightController = TextEditingController(text: widget.member.height?.toString() ?? '');
+    _weightController = TextEditingController(text: widget.member.weight?.toString() ?? '');
+    _targetWeightController = TextEditingController(text: widget.member.targetWeight?.toString() ?? '');
+    _bodyFatController = TextEditingController(text: widget.member.bodyFat?.toString() ?? '');
+    _skeletalMuscleController = TextEditingController(text: widget.member.skeletalMuscle?.toString() ?? '');
+    _targetMuscleController = TextEditingController(text: widget.member.targetMuscle?.toString() ?? '');
+    _activityLevelController = TextEditingController(text: widget.member.activityLevel ?? '');
+    _sleepTimeController = TextEditingController(text: widget.member.sleepTime ?? '');
+    _ageController = TextEditingController(text: widget.member.age?.toString() ?? ''); // age 초기화
   }
 
   @override
@@ -50,19 +52,21 @@ class _PhysicalInfoEditDialogState extends State<PhysicalInfoEditDialog> {
     _targetMuscleController.dispose();
     _activityLevelController.dispose();
     _sleepTimeController.dispose();
+    _ageController.dispose(); // age 컨트롤러 dispose
     super.dispose();
   }
 
   void _save() {
     if (_formKey.currentState!.validate()) {
-      // 기존 객체 복사본 생성 (copyWith 메서드가 Member 모델에 구현되어 있다고 가정)
+      // 기존 객체 복사본 생성 (타입 파싱)
       final updatedMember = widget.member.copyWith(
-        height: _heightController.text,
-        weight: _weightController.text,
-        targetWeight: _targetWeightController.text,
-        bodyFat: _bodyFatController.text,
-        skeletalMuscle: _skeletalMuscleController.text,
-        targetMuscle: _targetMuscleController.text,
+        height: double.tryParse(_heightController.text),
+        weight: double.tryParse(_weightController.text),
+        targetWeight: double.tryParse(_targetWeightController.text),
+        age: int.tryParse(_ageController.text),
+        bodyFat: double.tryParse(_bodyFatController.text),
+        skeletalMuscle: double.tryParse(_skeletalMuscleController.text),
+        targetMuscle: double.tryParse(_targetMuscleController.text),
         activityLevel: _activityLevelController.text,
         sleepTime: _sleepTimeController.text,
       );
@@ -99,6 +103,8 @@ class _PhysicalInfoEditDialogState extends State<PhysicalInfoEditDialog> {
                 const SizedBox(height: 24),
                 
                 // 입력 필드들
+                _buildRowInput('나이', _ageController), // age 필드 추가
+                const SizedBox(height: 12),
                 _buildRowInput('키 (cm)', _heightController),
                 const SizedBox(height: 12),
                 _buildRowInput('현재 체중 (kg)', _weightController),

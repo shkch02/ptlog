@@ -69,7 +69,7 @@ class PtSessionsTab extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${schedule.date} ${schedule.startTime}',
+                                '${DateFormat('yyyy-MM-dd').format(schedule.date)} ${schedule.startTime}',
                                 style: AppTextStyles.subtitle1.copyWith(
                                   color: isPast
                                       ? AppColors.textSecondary
@@ -104,7 +104,7 @@ class PtSessionsTab extends ConsumerWidget {
                               try {
                                 final log = await ref
                                     .read(workoutLogRepositoryProvider)
-                                    .getLogBySchedule(memberId, schedule.date);
+                                    .getLogBySchedule(memberId, DateFormat('yyyy-MM-dd').format(schedule.date));
 
                                 if (!context.mounted) return;
 

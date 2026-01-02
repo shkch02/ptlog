@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../models/index.dart';
@@ -108,14 +109,20 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
   }
 
   Future<void> _fetchWeeklyData() async {
-    // [수정] getWeeklySchedules 메서드가 삭제되었으므로, 로직을 비활성화하고 항상 빈 리스트를 반환하도록 임시 수정
-    // final scheduleRepo = ref.read(scheduleRepositoryProvider);
-    // final saturday = _sunday.add(const Duration(days: 6));
-    // final schedules = await scheduleRepo.getWeeklySchedules(_sunday, saturday);
+    final scheduleRepo = ref.read(scheduleRepositoryProvider);
+    final trainerId = ref.read(currentTrainerIdProvider);
+    final List<Schedule> allSchedules = [];
+
+    for (int i = 0; i < 7; i++) {
+      final day = _sunday.add(Duration(days: i));
+      final dateStr = DateFormat(AppStrings.dateFormatYmd).format(day);
+      final dailySchedules = await scheduleRepo.getSchedulesForTrainerByDate(trainerId, dateStr);
+      allSchedules.addAll(dailySchedules);
+    }
 
     if (mounted) {
       setState(() {
-        _weeklySchedules = []; // 항상 빈 리스트
+        _weeklySchedules = allSchedules;
         _isLoading = false;
       });
     }
@@ -219,13 +226,13 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
                                   final sHour =
                                       int.tryParse(s.startTime.split(':')[0]) ??
                                           -1;
-                                  return s.date == cellDateStr &&
+                                  return DateFormat(AppStrings.dateFormatYmd).format(s.date) == cellDateStr &&
                                       sHour == currentHour;
                                 },
                                 orElse: () => Schedule(
                                     id: '',
                                     relationId: '',
-                                    date: '',
+                                    date: DateTime(0),
                                     startTime: '',
                                     endTime: '',
                                     notes: '',

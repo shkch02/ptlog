@@ -5,18 +5,18 @@ class Member {
   final String email;
   final int remainingSessions;
   final int totalSessions;
-  final String registrationDate;
+  final DateTime registrationDate;
   final String notes;
   final String? profileImage;
 
-  // --- 추가된 신체 정보 필드 (Null 허용) ---
-  final String? height;        // 키
-  final String? weight;        // 현재 체중
-  final String? targetWeight;  // 목표 체중
-  final String? age;           // 나이
-  final String? bodyFat;       // 체지방률
-  final String? skeletalMuscle;// 골격근량
-  final String? targetMuscle;  // 목표 골격근량
+  // --- 추가된 신체 정보 필드 (타입 변경) ---
+  final double? height;        // 키
+  final double? weight;        // 현재 체중
+  final double? targetWeight;  // 목표 체중
+  final int? age;           // 나이
+  final double? bodyFat;       // 체지방률
+  final double? skeletalMuscle;// 골격근량
+  final double? targetMuscle;  // 목표 골격근량
   final String? activityLevel; // 활동량
   final String? sleepTime;     // 수면 시간
 
@@ -30,7 +30,7 @@ class Member {
     required this.registrationDate,
     required this.notes,
     this.profileImage,
-    // --- 생성자 추가 ---
+    // --- 생성자 ---
     this.height,
     this.weight,
     this.targetWeight,
@@ -49,17 +49,17 @@ class Member {
     String? email,
     int? remainingSessions,
     int? totalSessions,
-    String? registrationDate,
+    DateTime? registrationDate,
     String? notes,
     String? profileImage,
-    // --- copyWith 추가 ---
-    String? height,
-    String? weight,
-    String? targetWeight,
-    String? age,
-    String? bodyFat,
-    String? skeletalMuscle,
-    String? targetMuscle,
+    // --- copyWith 타입 변경 ---
+    double? height,
+    double? weight,
+    double? targetWeight,
+    int? age,
+    double? bodyFat,
+    double? skeletalMuscle,
+    double? targetMuscle,
     String? activityLevel,
     String? sleepTime,
   }) {
@@ -94,10 +94,10 @@ class Member {
       'email': email,
       'remainingSessions': remainingSessions,
       'totalSessions': totalSessions,
-      'registrationDate': registrationDate,
+      'registrationDate': registrationDate.toIso8601String(),
       'notes': notes,
       'profileImage': profileImage,
-      // --- toJson 추가 ---
+      // --- toJson 타입 변경 ---
       'height': height,
       'weight': weight,
       'targetWeight': targetWeight,
@@ -118,17 +118,17 @@ class Member {
       email: json['email'],
       remainingSessions: json['remainingSessions'],
       totalSessions: json['totalSessions'],
-      registrationDate: json['registrationDate'],
+      registrationDate: DateTime.parse(json['registrationDate']),
       notes: json['notes'],
       profileImage: json['profileImage'],
-      // --- fromJson 추가 ---
-      height: json['height'],
-      weight: json['weight'],
-      targetWeight: json['targetWeight'],
-      age: json['age'],
-      bodyFat: json['bodyFat'],
-      skeletalMuscle: json['skeletalMuscle'],
-      targetMuscle: json['targetMuscle'],
+      // --- fromJson 타입 변환 ---
+      height: (json['height'] as num?)?.toDouble(),
+      weight: (json['weight'] as num?)?.toDouble(),
+      targetWeight: (json['targetWeight'] as num?)?.toDouble(),
+      age: json['age'] as int?,
+      bodyFat: (json['bodyFat'] as num?)?.toDouble(),
+      skeletalMuscle: (json['skeletalMuscle'] as num?)?.toDouble(),
+      targetMuscle: (json['targetMuscle'] as num?)?.toDouble(),
       activityLevel: json['activityLevel'],
       sleepTime: json['sleepTime'],
     );

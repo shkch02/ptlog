@@ -1,7 +1,7 @@
 class PaymentLog {
   final String id;
   final String relationId; // 어떤 계약 관계에 속한 결제인지
-  final String date; // 결제일 or 연동일
+  final DateTime date; // 결제일 or 연동일
   final String type; // 'PT결제', '회원권', 'CRM연동' 등
   final String content; // '10회 등록', '성공' 등
   final String amount; // 금액 (옵션)
@@ -18,7 +18,7 @@ class PaymentLog {
   PaymentLog copyWith({
     String? id,
     String? relationId,
-    String? date,
+    DateTime? date,
     String? type,
     String? content,
     String? amount,
@@ -37,7 +37,7 @@ class PaymentLog {
     return {
       'id': id,
       'relationId': relationId,
-      'date': date,
+      'date': date.toIso8601String(),
       'type': type,
       'content': content,
       'amount': amount,
@@ -48,7 +48,7 @@ class PaymentLog {
     return PaymentLog(
       id: json['id'],
       relationId: json['relationId'],
-      date: json['date'],
+      date: DateTime.parse(json['date']),
       type: json['type'],
       content: json['content'],
       amount: json['amount'],

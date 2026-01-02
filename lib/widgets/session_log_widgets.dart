@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
@@ -23,7 +24,7 @@ class SessionLogHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(schedule.date, style: AppTextStyles.subtitle2),
+              Text(DateFormat('yyyy-MM-dd').format(schedule.date), style: AppTextStyles.subtitle2),
               const SizedBox(height: 4),
               Row(
                 children: [

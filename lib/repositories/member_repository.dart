@@ -1,18 +1,18 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ptlog/providers/repository_providers.dart';
+import 'package:ptlog/repositories/relation_repository.dart';
+
 import '../models/index.dart';
 import '../data/mock_data.dart';
 
 class MemberRepository {
-  final Ref ref;
-  MemberRepository(this.ref);
+  final RelationRepository _relationRepository;
+  MemberRepository(this._relationRepository);
 
   // [신규] 특정 트레이너에게 소속된 활성 회원 목록을 가져오는 메서드
   Future<List<Member>> getMembersForTrainer(String trainerId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     
     // 1. 트레이너에게 속한 활성 관계(relation)들을 찾음
-    final relations = await ref.read(relationRepositoryProvider).getActiveRelationsForTrainer(trainerId);
+    final relations = await _relationRepository.getActiveRelationsForTrainer(trainerId);
     final memberIds = relations.map((r) => r.memberId).toSet();
 
     // 2. 해당 ID를 가진 회원 정보들을 반환

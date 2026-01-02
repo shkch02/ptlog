@@ -31,7 +31,7 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
       relationId: 'temp_relation', // 임시 관계 ID
       memberId: memberId ?? 'guest',
       memberName: memberName,
-      date: DateFormat(AppStrings.dateFormatYmd).format(now),
+      date: now,
       startTime: DateFormat(AppStrings.dateFormatHm).format(now),
       endTime: DateFormat(AppStrings.dateFormatHm).format(now.add(const Duration(minutes: 50))),
       notes: notes,

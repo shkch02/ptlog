@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ptlog/models/index.dart';
-import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
 
 // [수정] Family의 파라미터로 trainerId와 date를 함께 받기 위해 Record 사용

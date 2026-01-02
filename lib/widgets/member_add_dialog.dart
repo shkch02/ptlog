@@ -38,16 +38,14 @@ class _MemberAddDialogState extends State<MemberAddDialog> {
     if (_formKey.currentState!.validate()) {
       // 새로운 회원 객체 생성
       final newMember = Member(
-        // 실무에선 uuid 패키지 사용 권장: const Uuid().v4()
-        id: DateTime.now().millisecondsSinceEpoch.toString(), 
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        remainingSessions: int.parse(_totalSessionController.text), // 초기엔 남은횟수 = 전체횟수
-        totalSessions: int.parse(_totalSessionController.text),
-        registrationDate: DateFormat('yyyy-MM-dd').format(_registrationDate),
+        remainingSessions: int.tryParse(_totalSessionController.text) ?? 0,
+        totalSessions: int.tryParse(_totalSessionController.text) ?? 0,
+        registrationDate: DateTime.now(),
         notes: _notesController.text,
-        profileImage: null, // 초기엔 이미지 없음
       );
 
       // 다이얼로그를 닫으면서 생성된 객체 반환

@@ -88,7 +88,7 @@ class WorkoutLog {
   final String id;
   final String memberId;
   final String memberName;
-  final String date;
+  final DateTime date;
   final int sessionNumber;
   final List<WorkoutExercise> exercises;
   final String overallNotes;
@@ -111,7 +111,7 @@ class WorkoutLog {
     String? id,
     String? memberId,
     String? memberName,
-    String? date,
+    DateTime? date,
     int? sessionNumber,
     List<WorkoutExercise>? exercises,
     String? overallNotes,
@@ -136,7 +136,7 @@ class WorkoutLog {
       'id': id,
       'memberId': memberId,
       'memberName': memberName,
-      'date': date,
+      'date': date.toIso8601String(),
       'sessionNumber': sessionNumber,
       'exercises': exercises.map((exercise) => exercise.toJson()).toList(),
       'overallNotes': overallNotes,
@@ -150,7 +150,7 @@ class WorkoutLog {
       id: json['id'],
       memberId: json['memberId'],
       memberName: json['memberName'],
-      date: json['date'],
+      date: DateTime.parse(json['date']),
       sessionNumber: json['sessionNumber'],
       exercises: (json['exercises'] as List).map((exercise) => WorkoutExercise.fromJson(exercise)).toList(),
       overallNotes: json['overallNotes'],

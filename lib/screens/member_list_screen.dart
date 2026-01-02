@@ -3,12 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/models/member.dart';
 import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
-import '../models/index.dart';
-import '../repositories/member_repository.dart';
-import '../widgets/member_detail_dialog.dart';
-import '../widgets/member_add_dialog.dart';
+import 'package:ptlog/widgets/member_add_dialog.dart';
+import 'package:ptlog/widgets/member_detail_dialog.dart';
 
 class MemberListScreen extends ConsumerStatefulWidget {
   const MemberListScreen({super.key});

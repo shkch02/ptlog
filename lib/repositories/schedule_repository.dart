@@ -1,23 +1,23 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_strings.dart';
-import 'package:ptlog/providers/repository_providers.dart';
+import 'package:ptlog/repositories/relation_repository.dart';
 import '../models/index.dart';
 import '../data/mock_data.dart';
 import 'package:intl/intl.dart';
 
 class ScheduleRepository {
-  final Ref ref;
-  ScheduleRepository(this.ref);
+  final RelationRepository _relationRepository;
+  ScheduleRepository(this._relationRepository);
 
   // [시그니처 변경] 특정 트레이너의 하루 스케줄을 가져옴
   Future<List<Schedule>> getSchedulesForTrainerByDate(String trainerId, String dateStr) async {
     await Future.delayed(const Duration(milliseconds: 300));
     
-    final relations = await ref.read(relationRepositoryProvider).getActiveRelationsForTrainer(trainerId);
+    final relations = await _relationRepository.getActiveRelationsForTrainer(trainerId);
     final relationIds = relations.map((r) => r.id).toSet();
 
     final filtered = mockSchedules.where((s) {
-      return s.date == dateStr && relationIds.contains(s.relationId);
+      // s.date (DateTime)를 'yyyy-MM-dd' 형식의 문자열로 변환하여 비교
+      return DateFormat(AppStrings.dateFormatYmd).format(s.date) == dateStr && relationIds.contains(s.relationId);
     }).toList();
     
     filtered.sort((a, b) => a.startTime.compareTo(b.startTime));
@@ -29,13 +29,16 @@ class ScheduleRepository {
     await Future.delayed(const Duration(milliseconds: 300));
     
     final now = DateTime.now();
-    final todayStr = DateFormat(AppStrings.dateFormatYmd).format(now);
-
-    final relations = await ref.read(relationRepositoryProvider).getActiveRelationsForTrainer(trainerId);
+    
+    final relations = await _relationRepository.getActiveRelationsForTrainer(trainerId);
     final relationIds = relations.map((r) => r.id).toSet();
 
     final todaySchedules = mockSchedules.where((s) {
-      return s.date == todayStr && relationIds.contains(s.relationId);
+      // DateTime 객체의 년/월/일이 같은지 직접 비교
+      return s.date.year == now.year &&
+             s.date.month == now.month &&
+             s.date.day == now.day &&
+             relationIds.contains(s.relationId);
     }).toList();
 
     todaySchedules.sort((a, b) => a.startTime.compareTo(b.startTime));
@@ -75,21 +78,29 @@ class ScheduleRepository {
     final memberSchedules = mockSchedules.where((s) => relationIds.contains(s.relationId)).toList();
     
     memberSchedules.sort((a, b) {
-      String dtA = '${a.date} ${a.startTime}';
-      String dtB = '${b.date} ${b.startTime}';
-      return dtB.compareTo(dtA); 
+      // DateTime과 시간(String)을 조합하여 비교
+      final aTimeParts = a.startTime.split(':');
+      final aDateTime = a.date.add(Duration(hours: int.parse(aTimeParts[0]), minutes: int.parse(aTimeParts[1])));
+
+      final bTimeParts = b.startTime.split(':');
+      final bDateTime = b.date.add(Duration(hours: int.parse(bTimeParts[0]), minutes: int.parse(bTimeParts[1])));
+      
+      return bDateTime.compareTo(aDateTime); 
     });
     
     return memberSchedules;
   }
 
   // [시그니처 변경] 특정 트레이너의 스케줄 충돌을 확인
-  Future<bool> checkConflictForTrainer(String trainerId, String date, String startTime, String endTime) async {
-    final relations = await ref.read(relationRepositoryProvider).getActiveRelationsForTrainer(trainerId);
+  Future<bool> checkConflictForTrainer(String trainerId, DateTime date, String startTime, String endTime) async {
+    final relations = await _relationRepository.getActiveRelationsForTrainer(trainerId);
     final relationIds = relations.map((r) => r.id).toSet();
 
     final daySchedules = mockSchedules.where((s) {
-      return s.date == date && relationIds.contains(s.relationId);
+      return s.date.year == date.year &&
+             s.date.month == date.month &&
+             s.date.day == date.day &&
+             relationIds.contains(s.relationId);
     }).toList();
 
     int toMinutes(String time) {

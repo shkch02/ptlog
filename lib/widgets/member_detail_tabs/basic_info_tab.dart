@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../models/member.dart';
 import '../../../constants/app_colors.dart';
@@ -33,7 +34,7 @@ class BasicInfoTab extends StatelessWidget {
                   const Divider(height: 24),
                   _buildInfoRow(LucideIcons.cake, '나이', member.age != null ? '${member.age}세' : '-'),
                   const Divider(height: 24),
-                  _buildInfoRow(LucideIcons.calendar, '등록일', member.registrationDate),
+                  _buildInfoRow(LucideIcons.calendar, '등록일', DateFormat('yyyy-MM-dd').format(member.registrationDate)),
                 ],
               ),
             ),
@@ -130,9 +131,9 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   // 값이 있으면 단위 붙여서 반환, 없으면 '-'
-  String _formatValue(String? value, String unit) {
-    if (value == null || value.isEmpty) return '-';
-    return '$value $unit';
+  String _formatValue(dynamic value, String unit) {
+    if (value == null || value.toString().isEmpty) return '-';
+    return '${value.toString()} $unit';
   }
 
   Widget _buildSectionTitle(String title) {

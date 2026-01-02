@@ -1,4 +1,6 @@
 // lib/repositories/workout_log_repository.dart
+import 'package:intl/intl.dart';
+
 import '../models/index.dart';
 import '../data/mock_data.dart'; // 데이터 소스는 Repository만 알고 있음
 
@@ -14,7 +16,7 @@ class WorkoutLogRepository {
     await Future.delayed(const Duration(milliseconds: 300));
     try {
       return mockWorkoutLogs.firstWhere(
-        (log) => log.memberId == memberId && log.date == date,
+        (log) => log.memberId == memberId && DateFormat('yyyy-MM-dd').format(log.date) == date,
       );
     } catch (e) {
       return null;

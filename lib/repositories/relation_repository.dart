@@ -1,10 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/data/mock_data.dart';
 import 'package:ptlog/models/trainer_member_relation.dart';
 
 class RelationRepository {
-  final Ref ref;
-  RelationRepository(this.ref);
+  RelationRepository();
 
   // 특정 트레이너의 모든 활성 관계(계약) 목록 가져오기
   Future<List<TrainerMemberRelation>> getActiveRelationsForTrainer(String trainerId) async {
@@ -21,7 +19,7 @@ class RelationRepository {
       id: 'r${DateTime.now().millisecondsSinceEpoch}',
       trainerId: trainerId,
       memberId: memberId,
-      startDate: DateTime.now().toString().split(' ')[0],
+      startDate: DateTime.now(),
       isActive: true,
       // JOIN된 데이터는 실제 백엔드에서 채워줘야 함
       memberName: mockMembers.firstWhere((m) => m.id == memberId).name,
@@ -39,7 +37,7 @@ class RelationRepository {
       final original = mockTrainerMemberRelations[index];
       mockTrainerMemberRelations[index] = original.copyWith(
         isActive: false,
-        endDate: DateTime.now().toString().split(' ')[0],
+        endDate: DateTime.now(),
       );
     }
   }

@@ -3,7 +3,7 @@ class Schedule {
   final String relationId; // 어떤 계약 관계에 속한 스케줄인지
   final String? memberId;   // 편의를 위한 필드 (JOIN된 데이터)
   final String? memberName; // 편의를 위한 필드 (JOIN된 데이터)
-  final String date;
+  final DateTime date;
   final String startTime;
   final String endTime;
   final String notes;
@@ -26,7 +26,7 @@ class Schedule {
     String? relationId,
     String? memberId,
     String? memberName,
-    String? date,
+    DateTime? date,
     String? startTime,
     String? endTime,
     String? notes,
@@ -51,7 +51,7 @@ class Schedule {
       'relationId': relationId,
       'memberId': memberId,
       'memberName': memberName,
-      'date': date,
+      'date': date.toIso8601String(),
       'startTime': startTime,
       'endTime': endTime,
       'notes': notes,
@@ -65,7 +65,7 @@ class Schedule {
       relationId: json['relationId'],
       memberId: json['memberId'],
       memberName: json['memberName'],
-      date: json['date'],
+      date: DateTime.parse(json['date']),
       startTime: json['startTime'],
       endTime: json['endTime'],
       notes: json['notes'],

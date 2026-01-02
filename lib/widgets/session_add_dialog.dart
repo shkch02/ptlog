@@ -49,7 +49,6 @@ class _SessionAddDialogState extends ConsumerState<SessionAddDialog> {
     setState(() => _isChecking = true);
 
     final repo = ref.read(scheduleRepositoryProvider);
-    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
     
     // 시작 시간 포맷팅 (HH:mm)
     final startHour = _startTime.hour.toString().padLeft(2, '0');
@@ -84,7 +83,7 @@ class _SessionAddDialogState extends ConsumerState<SessionAddDialog> {
     }
 
     // 2. 중복 체크 (트레이너 ID와 함께)
-    final hasConflict = await repo.checkConflictForTrainer(trainerId, dateStr, startTimeStr, endTimeStr);
+    final hasConflict = await repo.checkConflictForTrainer(trainerId, _selectedDate, startTimeStr, endTimeStr);
 
     setState(() => _isChecking = false);
 
@@ -103,7 +102,7 @@ class _SessionAddDialogState extends ConsumerState<SessionAddDialog> {
     final newSchedule = Schedule(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       relationId: relation.id, // memberId 대신 relation.id 사용
-      date: dateStr,
+      date: _selectedDate,
       startTime: startTimeStr,
       endTime: endTimeStr,
       notes: 'PT 수업',

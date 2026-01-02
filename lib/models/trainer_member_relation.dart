@@ -2,8 +2,8 @@ class TrainerMemberRelation {
   final String id;
   final String trainerId;
   final String memberId;
-  final String startDate;
-  final String? endDate;
+  final DateTime startDate;
+  final DateTime? endDate;
   final bool isActive;
 
   // 편의를 위해 JOIN된 데이터를 포함할 수 있습니다. (백엔드에서 채워줘야 함)
@@ -25,8 +25,8 @@ class TrainerMemberRelation {
     String? id,
     String? trainerId,
     String? memberId,
-    String? startDate,
-    String? endDate,
+    DateTime? startDate,
+    DateTime? endDate,
     bool? isActive,
     String? memberName,
     String? trainerName,
@@ -48,8 +48,8 @@ class TrainerMemberRelation {
       'id': id,
       'trainerId': trainerId,
       'memberId': memberId,
-      'startDate': startDate,
-      'endDate': endDate,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
       'isActive': isActive,
       'memberName': memberName,
       'trainerName': trainerName,
@@ -61,8 +61,8 @@ class TrainerMemberRelation {
       id: json['id'],
       trainerId: json['trainerId'],
       memberId: json['memberId'],
-      startDate: json['startDate'],
-      endDate: json['endDate'],
+      startDate: DateTime.parse(json['startDate']),
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
       isActive: json['isActive'],
       memberName: json['memberName'],
       trainerName: json['trainerName'],

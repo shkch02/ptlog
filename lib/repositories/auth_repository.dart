@@ -1,8 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthRepository {
-  final Ref ref;
-  AuthRepository(this.ref);
+  AuthRepository();
 
   Future<bool> login(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 1000));
