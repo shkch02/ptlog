@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ptlog/providers/home_providers.dart';
+import 'package:ptlog/providers/repository_providers.dart';
 import '../models/index.dart';
 import '../data/mock_data.dart';
 
@@ -7,45 +7,51 @@ class MemberRepository {
   final Ref ref;
   MemberRepository(this.ref);
 
-  // 모든 회원 가져오기
+  // [신규] 특정 트레이너에게 소속된 활성 회원 목록을 가져오는 메서드
+  Future<List<Member>> getMembersForTrainer(String trainerId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // 1. 트레이너에게 속한 활성 관계(relation)들을 찾음
+    final relations = await ref.read(relationRepositoryProvider).getActiveRelationsForTrainer(trainerId);
+    final memberIds = relations.map((r) => r.memberId).toSet();
+
+    // 2. 해당 ID를 가진 회원 정보들을 반환
+    return mockMembers.where((m) => memberIds.contains(m.id)).toList();
+  }
+
+  // [의미 변경] 이제 시스템의 '모든' 회원을 가져옴 (회원 검색 등에서 사용)
   Future<List<Member>> getAllMembers() async {
     await Future.delayed(const Duration(milliseconds: 300));
-    return List.from(mockMembers); // 리스트 복사해서 반환
+    return List.from(mockMembers);
   }
 
-  // 재등록 필요 회원 가져오기 (3회 이하)
-  Future<List<Member>> getRenewalNeededMembers() async {
+  // [로직 변경 필요] 이제 특정 트레이너의 회원들 중에서 만료 임박 회원을 찾아야 함
+  Future<List<Member>> getRenewalNeededMembersForTrainer(String trainerId) async {
     await Future.delayed(const Duration(milliseconds: 300));
-    return mockMembers.where((m) => m.remainingSessions <= 3).toList();
+    final myMembers = await getMembersForTrainer(trainerId);
+    return myMembers.where((m) => m.remainingSessions <= 3).toList();
   }
 
-  //  특정 회원의 결제 내역 가져오기
-  Future<List<PaymentLog>> getPaymentHistory(String memberId) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    // mockPaymentLogs는 mock_data.dart에 있다고 가정
-    return mockPaymentLogs.where((p) => p.memberId == memberId).toList();
-  }
+  // [삭제 또는 변경] memberId 대신 relationId를 사용해야 하므로 이 메서드는 유효하지 않음
+  // Future<List<PaymentLog>> getPaymentHistory(String memberId) async { ... }
+  // -> PaymentLogRepository 또는 RelationRepository에서 처리하는 것이 적합
 
-  // 회원 메모 업데이트
+  // 회원 메모 업데이트 (이 기능은 Member 객체 자체를 수정하므로 변경 없음)
   Future<void> updateMemberNotes(String memberId, String newNotes) async {
     await Future.delayed(const Duration(milliseconds: 200));
     
     final index = mockMembers.indexWhere((m) => m.id == memberId);
     if (index != -1) {
-      // copyWith를 사용하여 새로운 객체 생성
       final updatedMember = mockMembers[index].copyWith(notes: newNotes);
-      // 리스트에서 해당 멤버 교체
       mockMembers[index] = updatedMember;
-
       // 데이터 변경 후, 이 데이터와 관련된 Provider를 무효화!
-      ref.invalidate(allMembersProvider);
-      ref.invalidate(renewalMembersProvider);
+      // ref.invalidate(...); // Provider 단에서 처리
     }
   }
 
-  //회원 추가 메서드
+  // 회원 추가 (이 기능은 순수 Member를 추가하므로 변경 없음)
   Future<void> addMember(Member member) async {
-    await Future.delayed(const Duration(milliseconds: 500)); // 저장하는 척 딜레이
-    mockMembers.add(member); // 실제 목업 리스트에 추가
+    await Future.delayed(const Duration(milliseconds: 500));
+    mockMembers.add(member);
   }
 }

@@ -108,14 +108,14 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
   }
 
   Future<void> _fetchWeeklyData() async {
-    final scheduleRepo = ref.read(scheduleRepositoryProvider);
-    final saturday = _sunday.add(const Duration(days: 6));
-
-    final schedules = await scheduleRepo.getWeeklySchedules(_sunday, saturday);
+    // [수정] getWeeklySchedules 메서드가 삭제되었으므로, 로직을 비활성화하고 항상 빈 리스트를 반환하도록 임시 수정
+    // final scheduleRepo = ref.read(scheduleRepositoryProvider);
+    // final saturday = _sunday.add(const Duration(days: 6));
+    // final schedules = await scheduleRepo.getWeeklySchedules(_sunday, saturday);
 
     if (mounted) {
       setState(() {
-        _weeklySchedules = schedules;
+        _weeklySchedules = []; // 항상 빈 리스트
         _isLoading = false;
       });
     }
@@ -224,8 +224,7 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
                                 },
                                 orElse: () => Schedule(
                                     id: '',
-                                    memberId: '',
-                                    memberName: '',
+                                    relationId: '',
                                     date: '',
                                     startTime: '',
                                     endTime: '',
@@ -250,7 +249,7 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              schedule.memberName,
+                                              schedule.memberName ?? '', // [수정] Null 처리
                                               style: AppTextStyles.caption
                                                   .copyWith(
                                                       fontWeight:

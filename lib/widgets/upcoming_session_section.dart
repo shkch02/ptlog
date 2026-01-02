@@ -209,7 +209,7 @@ class UpcomingSessionSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColors.white,
-                  child: Text(schedule.memberName[0], style: AppTextStyles.button.copyWith(color: AppColors.primary)),
+                  child: Text((schedule.memberName ?? ' ')[0], style: AppTextStyles.button.copyWith(color: AppColors.primary)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -217,7 +217,7 @@ class UpcomingSessionSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${schedule.memberName} 회원님',
+                        '${schedule.memberName ?? '이름 없음'} 회원님',
                         style: AppTextStyles.h3.copyWith(color: AppColors.white),
                       ),
                       Text(
@@ -231,7 +231,7 @@ class UpcomingSessionSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 InkWell(
-                  onTap: () => onMemberInfoTap(schedule.memberId),
+                  onTap: () => onMemberInfoTap(schedule.memberId ?? ''), // [수정] Null 처리
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

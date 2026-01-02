@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/home_providers.dart'; // [추가]
 import 'package:ptlog/providers/schedule_providers.dart';
 import '../models/index.dart';
 import '../widgets/schedule_dialogs.dart';
@@ -35,7 +36,10 @@ class _ScheduleViewScreenState extends ConsumerState<ScheduleViewScreen> {
     // Normalize the date to avoid unnecessary rebuilds
     final normalizedDate =
         DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-    final asyncSchedules = ref.watch(schedulesByDateProvider(normalizedDate));
+    
+    // [수정] provider 호출 방식 변경
+    final trainerId = ref.watch(currentTrainerIdProvider);
+    final asyncSchedules = ref.watch(schedulesByDateProvider((trainerId: trainerId, date: normalizedDate)));
 
     return Column(
       children: [
@@ -231,7 +235,7 @@ class _ScheduleViewScreenState extends ConsumerState<ScheduleViewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      schedule.memberName,
+                      schedule.memberName ?? '이름 없음', // [수정] Null 처리
                       style: AppTextStyles.subtitle1,
                     ),
                     const SizedBox(height: 4),

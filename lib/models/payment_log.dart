@@ -1,6 +1,6 @@
 class PaymentLog {
   final String id;
-  final String memberId;
+  final String relationId; // 어떤 계약 관계에 속한 결제인지
   final String date; // 결제일 or 연동일
   final String type; // 'PT결제', '회원권', 'CRM연동' 등
   final String content; // '10회 등록', '성공' 등
@@ -8,7 +8,7 @@ class PaymentLog {
 
   PaymentLog({
     required this.id,
-    required this.memberId,
+    required this.relationId,
     required this.date,
     required this.type,
     required this.content,
@@ -17,7 +17,7 @@ class PaymentLog {
 
   PaymentLog copyWith({
     String? id,
-    String? memberId,
+    String? relationId,
     String? date,
     String? type,
     String? content,
@@ -25,7 +25,7 @@ class PaymentLog {
   }) {
     return PaymentLog(
       id: id ?? this.id,
-      memberId: memberId ?? this.memberId,
+      relationId: relationId ?? this.relationId,
       date: date ?? this.date,
       type: type ?? this.type,
       content: content ?? this.content,
@@ -36,7 +36,7 @@ class PaymentLog {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'memberId': memberId,
+      'relationId': relationId,
       'date': date,
       'type': type,
       'content': content,
@@ -47,7 +47,7 @@ class PaymentLog {
   factory PaymentLog.fromJson(Map<String, dynamic> json) {
     return PaymentLog(
       id: json['id'],
-      memberId: json['memberId'],
+      relationId: json['relationId'],
       date: json['date'],
       type: json['type'],
       content: json['content'],

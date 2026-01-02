@@ -27,7 +27,7 @@ class SessionLogHeader extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Text(schedule.memberName, style: AppTextStyles.h3),
+                  Text(schedule.memberName ?? '이름 없음', style: AppTextStyles.h3), // [수정] Null 처리
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

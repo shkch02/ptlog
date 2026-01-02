@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/models/index.dart';
+import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
 import 'package:ptlog/providers/schedule_providers.dart'; // invalidate용
 
@@ -65,8 +66,25 @@ class _SessionAddDialogState extends ConsumerState<SessionAddDialog> {
     final endMin = endDateTime.minute.toString().padLeft(2, '0');
     final endTimeStr = '$endHour:$endMin';
 
-    // 1. 중복 체크
-    final hasConflict = await repo.checkConflict(dateStr, startTimeStr, endTimeStr);
+    // [수정] 1. 현재 트레이너와 회원 사이의 활성 관계(relation) 찾기
+    final trainerId = ref.read(currentTrainerIdProvider);
+    final relation = await ref.read(relationRepositoryProvider).getActiveRelation(
+      trainerId: trainerId,
+      memberId: widget.member.id,
+    );
+
+    if (relation == null) {
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('오류: 회원과의 활성 계약 관계를 찾을 수 없습니다.')),
+        );
+      }
+      setState(() => _isChecking = false);
+      return;
+    }
+
+    // 2. 중복 체크 (트레이너 ID와 함께)
+    final hasConflict = await repo.checkConflictForTrainer(trainerId, dateStr, startTimeStr, endTimeStr);
 
     setState(() => _isChecking = false);
 
@@ -81,23 +99,23 @@ class _SessionAddDialogState extends ConsumerState<SessionAddDialog> {
       return;
     }
 
-    // 2. 일정 객체 생성
+    // 3. 일정 객체 생성 (relationId 사용)
     final newSchedule = Schedule(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      memberId: widget.member.id,
-      memberName: widget.member.name,
+      relationId: relation.id, // memberId 대신 relation.id 사용
       date: dateStr,
       startTime: startTimeStr,
       endTime: endTimeStr,
       notes: 'PT 수업',
       reminder: '1시간 전',
+      memberName: widget.member.name, // 편의를 위해 이름은 유지
     );
 
-    // 3. 저장 및 갱신
+    // 4. 저장 및 갱신
     await repo.addSchedule(newSchedule);
     
-    // 해당 회원의 스케줄 목록 갱신 (PtSessionsTab이 다시 빌드됨)
-    ref.invalidate(memberSchedulesProvider(widget.member.id));
+    // 해당 회원의 스케줄 목록 갱신
+    ref.invalidate(memberSchedulesHistoryProvider(widget.member.id));
 
     if (!mounted) return;
     Navigator.pop(context); // 다이얼로그 닫기

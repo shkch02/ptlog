@@ -1,23 +1,38 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ptlog/data/mock_data.dart';
 import 'package:ptlog/models/index.dart';
 import 'package:ptlog/providers/repository_providers.dart';
 
+// 가정: 현재 로그인한 트레이너의 ID를 제공하는 Provider.
+// 실제 앱에서는 로그인 상태를 관리하는 Provider가 이 역할을 대신해야 합니다.
+final currentTrainerIdProvider = Provider<String>((ref) {
+  return currentTrainerId; // mock_data.dart에 정의된 상수
+});
+
+// [수정] 특정 트레이너의 다음 스케줄
 final upcomingSchedulesProvider = FutureProvider<List<Schedule>>((ref) async {
+  final trainerId = ref.watch(currentTrainerIdProvider);
   final scheduleRepo = ref.watch(scheduleRepositoryProvider);
-  return scheduleRepo.getUpcomingSchedules();
+  return scheduleRepo.getUpcomingSchedulesForTrainer(trainerId);
 });
 
+// [수정] 특정 트레이너의 만료 임박 회원
 final renewalMembersProvider = FutureProvider<List<Member>>((ref) async {
+  final trainerId = ref.watch(currentTrainerIdProvider);
   final memberRepo = ref.watch(memberRepositoryProvider);
-  return memberRepo.getRenewalNeededMembers();
+  return memberRepo.getRenewalNeededMembersForTrainer(trainerId);
 });
 
-final allMembersProvider = FutureProvider<List<Member>>((ref) async {
+// [수정] 특정 트레이너의 전체 회원 목록
+final membersForTrainerProvider = FutureProvider<List<Member>>((ref) async {
+  final trainerId = ref.watch(currentTrainerIdProvider);
   final memberRepo = ref.watch(memberRepositoryProvider);
-  return memberRepo.getAllMembers();
+  return memberRepo.getMembersForTrainer(trainerId);
 });
 
+// [수정] 특정 트레이너의 다음 세션 힌트
 final nextSessionMessageProvider = FutureProvider<String?>((ref) async {
+  final trainerId = ref.watch(currentTrainerIdProvider);
   final scheduleRepo = ref.watch(scheduleRepositoryProvider);
-  return scheduleRepo.getNextSessionHint();
+  return scheduleRepo.getNextSessionHintForTrainer(trainerId);
 });

@@ -1,7 +1,8 @@
 class Schedule {
   final String id;
-  final String memberId;
-  final String memberName;
+  final String relationId; // 어떤 계약 관계에 속한 스케줄인지
+  final String? memberId;   // 편의를 위한 필드 (JOIN된 데이터)
+  final String? memberName; // 편의를 위한 필드 (JOIN된 데이터)
   final String date;
   final String startTime;
   final String endTime;
@@ -10,8 +11,9 @@ class Schedule {
 
   Schedule({
     required this.id,
-    required this.memberId,
-    required this.memberName,
+    required this.relationId,
+    this.memberId,
+    this.memberName,
     required this.date,
     required this.startTime,
     required this.endTime,
@@ -21,6 +23,7 @@ class Schedule {
 
   Schedule copyWith({
     String? id,
+    String? relationId,
     String? memberId,
     String? memberName,
     String? date,
@@ -31,6 +34,7 @@ class Schedule {
   }) {
     return Schedule(
       id: id ?? this.id,
+      relationId: relationId ?? this.relationId,
       memberId: memberId ?? this.memberId,
       memberName: memberName ?? this.memberName,
       date: date ?? this.date,
@@ -44,6 +48,7 @@ class Schedule {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'relationId': relationId,
       'memberId': memberId,
       'memberName': memberName,
       'date': date,
@@ -57,6 +62,7 @@ class Schedule {
   factory Schedule.fromJson(Map<String, dynamic> json) {
     return Schedule(
       id: json['id'],
+      relationId: json['relationId'],
       memberId: json['memberId'],
       memberName: json['memberName'],
       date: json['date'],

@@ -28,6 +28,7 @@ class _ManualSessionDialogState extends State<ManualSessionDialog> {
     final now = DateTime.now();
     return Schedule(
       id: DateTime.now().millisecondsSinceEpoch.toString(), // 임시 ID 생성
+      relationId: 'temp_relation', // 임시 관계 ID
       memberId: memberId ?? 'guest',
       memberName: memberName,
       date: DateFormat(AppStrings.dateFormatYmd).format(now),

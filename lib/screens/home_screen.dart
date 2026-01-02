@@ -18,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncSchedules = ref.watch(upcomingSchedulesProvider);
     final asyncRenewals = ref.watch(renewalMembersProvider);
-    final asyncAllMembers = ref.watch(allMembersProvider);
+    final asyncAllMembers = ref.watch(membersForTrainerProvider); // [수정] allMembersProvider -> membersForTrainerProvider
     final asyncMessage = ref.watch(nextSessionMessageProvider);
 
     final isLoading = asyncSchedules.isLoading ||

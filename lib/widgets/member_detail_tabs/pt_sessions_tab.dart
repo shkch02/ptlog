@@ -21,8 +21,8 @@ class PtSessionsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // [추가] Provider를 통해 스케줄 목록을 구독합니다.
-    final schedulesAsync = ref.watch(memberSchedulesProvider(member.id));
+    // [수정] memberSchedulesProvider -> memberSchedulesHistoryProvider
+    final schedulesAsync = ref.watch(memberSchedulesHistoryProvider(member.id));
 
     return SizedBox(
       height: 400, // 탭 내부 높이 지정 (필요 시 조정)
@@ -94,10 +94,17 @@ class PtSessionsTab extends ConsumerWidget {
                         OutlinedButton.icon(
                           onPressed: () async {
                             if (isPast) {
+                              final memberId = schedule.memberId;
+                              if (memberId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('오류: 회원 ID를 찾을 수 없습니다.')),
+                                );
+                                return;
+                              }
                               try {
                                 final log = await ref
                                     .read(workoutLogRepositoryProvider)
-                                    .getLogBySchedule(schedule.memberId, schedule.date);
+                                    .getLogBySchedule(memberId, schedule.date);
 
                                 if (!context.mounted) return;
 

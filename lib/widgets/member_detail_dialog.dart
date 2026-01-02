@@ -37,12 +37,13 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
   }
 
   Future<void> _loadAsyncData() async {
-    // [수정] 스케줄 리포지토리 호출 불필요
-    final memberRepo = ref.read(memberRepositoryProvider);
+    // [수정] getPaymentHistory는 삭제되었으므로 관련 로직 제거
+    // final memberRepo = ref.read(memberRepositoryProvider);
+    // final payments = await memberRepo.getPaymentHistory(widget.member.id);
+    
+    // 임시로 빈 리스트를 사용하도록 설정
+    final payments = <PaymentLog>[];
 
-    // [수정] 결제 내역만 로드하도록 변경 (스케줄은 PtSessionsTab 내부에서 로드함)
-    final payments = await memberRepo.getPaymentHistory(widget.member.id);
-  
     if (mounted) {
       setState(() {
         _memberPayments = payments; // 결과 할당

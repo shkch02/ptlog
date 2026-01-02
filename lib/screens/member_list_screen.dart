@@ -35,17 +35,19 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     );
 
     if (newMember != null) {
-      // 1. 리포지토리를 통해 멤버 추가 (비동기)
-      // repositoryProviders.dart에 정의된 memberRepositoryProvider를 사용합니다.
+      // 1. MemberRepository를 통해 순수 Member 정보 추가
       await ref.read(memberRepositoryProvider).addMember(newMember);
       
-      // 2. 리스트 새로고침 (Riverpod가 다시 로딩 -> 데이터 표시)
-      // invalidate를 사용하면 해당 프로바이더를 초기화하여 다시 읽어오게 합니다.
-      ref.invalidate(allMembersProvider);
+      // 2. [신규] RelationRepository를 통해 현재 트레이너와 새 회원을 연결
+      final trainerId = ref.read(currentTrainerIdProvider);
+      await ref.read(relationRepositoryProvider).createRelation(trainerId, newMember.id);
+
+      // 3. 회원 목록 새로고침
+      ref.invalidate(membersForTrainerProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${newMember.name} 회원님이 등록되었습니다.')),
+          SnackBar(content: Text('${newMember.name} 회원님이 등록 및 연결되었습니다.')),
         );
       }
     }
@@ -53,7 +55,8 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncMembers = ref.watch(allMembersProvider);
+    // [수정] allMembersProvider -> membersForTrainerProvider
+    final asyncMembers = ref.watch(membersForTrainerProvider);
 
     return asyncMembers.when(
       loading: () => const Center(child: CircularProgressIndicator()),
