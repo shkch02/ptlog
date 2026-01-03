@@ -35,8 +35,8 @@ List<TrainerMemberRelation> mockTrainerMemberRelations = [
 // Mock Schedules (이제 relationId를 통해 계약 관계에 종속됨)
 // ------------------------------------------------------------------------
 List<Schedule> mockSchedules = [
-  Schedule(id: 's1', relationId: 'r1', memberId: '1', date: DateTime.parse(today), startTime: '01:00', endTime: '02:00', notes: '허리 디스크 병력 있음. 데드리프트 중량 치지 말 것', reminder: '10분 전 알림', memberName: '김민수'),
-  Schedule(id: 's2', relationId: 'r2', memberId: '2', date: DateTime.parse(today), startTime: '23:00', endTime: '24:00', notes: '하체 비만 관리: 스쿼트 자세 교정 필요', reminder: '1시간 전 알림', memberName: '이영희'),
+  Schedule(id: 's1', relationId: 'r1', memberId: '1', date: DateTime.parse(today), startTime: '09:00', endTime: '10:00', notes: '허리 디스크 병력 있음. 데드리프트 중량 치지 말 것', reminder: '10분 전 알림', memberName: '김민수'),
+  Schedule(id: 's2', relationId: 'r2', memberId: '2', date: DateTime.parse(today), startTime: '15:00', endTime: '16:00', notes: '하체 비만 관리: 스쿼트 자세 교정 필요', reminder: '1시간 전 알림', memberName: '이영희'),
   Schedule(id: 's3', relationId: 'r1', memberId: '1', date: DateTime.parse(tomorrow), startTime: '10:00', endTime: '11:00', notes: '등 운동: 랫풀다운, 시티드 로우 (허리 조심)', reminder: '10분 전 알림', memberName: '김민수'),
 ];
 

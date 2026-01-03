@@ -109,16 +109,22 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
   }
 
   Future<void> _fetchWeeklyData() async {
-    final scheduleRepo = ref.read(scheduleRepositoryProvider);
-    final trainerId = ref.read(currentTrainerIdProvider);
-    final List<Schedule> allSchedules = [];
+  final scheduleRepo = ref.read(scheduleRepositoryProvider);
+  final trainerId = ref.read(currentTrainerIdProvider);
 
-    for (int i = 0; i < 7; i++) {
-      final day = _sunday.add(Duration(days: i));
-      final dateStr = DateFormat(AppStrings.dateFormatYmd).format(day);
-      final dailySchedules = await scheduleRepo.getSchedulesForTrainerByDate(trainerId, dateStr);
-      allSchedules.addAll(dailySchedules);
-    }
+  // 1. 실행할 Future(비동기 작업)들을 리스트로 만듭니다.
+  final List<Future<List<Schedule>>> fetchRequests = List.generate(7, (i) {
+    final day = _sunday.add(Duration(days: i));
+    final dateStr = DateFormat(AppStrings.dateFormatYmd).format(day);
+    return scheduleRepo.getSchedulesForTrainerByDate(trainerId, dateStr);
+  });
+
+  try {
+    // 2. Future.wait을 통해 7개의 요청을 동시에 실행하고 모두 끝날 때까지 기다립니다.
+    final List<List<Schedule>> results = await Future.wait(fetchRequests);
+
+    // 3. 2차원 리스트 결과값을 1차원 리스트로 합칩니다.
+    final allSchedules = results.expand((schedules) => schedules).toList();
 
     if (mounted) {
       setState(() {
@@ -126,8 +132,12 @@ class _WeeklyTimetableDialogState extends ConsumerState<WeeklyTimetableDialog> {
         _isLoading = false;
       });
     }
+  } catch (e) {
+    // 에러 처리 로직 추가 가능
+    if (mounted) setState(() => _isLoading = false);
   }
-
+}
+ 
   @override
   Widget build(BuildContext context) {
     const startHour = 9;
