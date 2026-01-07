@@ -8,7 +8,7 @@ class ScheduleRepository {
   final RelationRepository _relationRepository;
   ScheduleRepository(this._relationRepository);
 
-  // [시그니처 변경] 특정 트레이너의 하루 스케줄을 가져옴
+  // 특정트레이너의 특정 날짜에 잡힌 세션리스트 반환
   Future<List<Schedule>> getSchedulesForTrainerByDate(String trainerId, String dateStr) async {
     await Future.delayed(const Duration(milliseconds: 300));
     
