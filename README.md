@@ -1,101 +1,171 @@
-# PT-Log: 피티로그 (PT 회원 관리 솔루션)
+# PTLog - 피트니스 트레이너를 위한 회원 관리 앱
 
-`PT-Log`는 퍼스널 트레이너를 위한 모바일 회원 관리 애플리케이션입니다. 흩어져 있는 회원 정보, 스케줄, 운동 일지를 하나의 앱에서 체계적으로 관리하여 트레이너가 수업에만 집중할 수 있도록 돕습니다.
+PTLog는 피트니스 트레이너가 회원을 효율적으로 관리하고, 수업 스케줄을 계획하며, 운동 일지를 기록할 수 있도록 돕는 모바일 애플리케이션입니다.
 
-## 1. 주요 기능
+## 주요 기능
 
--   **대시보드 (홈 화면)**: 오늘 예정된 수업, 재등록이 필요한 회원을 한눈에 파악합니다.
--   **회원 관리**: 전체 회원 목록을 검색하고, 신규 회원을 등록하며, 각 회원의 상세 정보(기본 정보, PT 세션 내역, 상세 메모, 결제 내역)를 관리합니다.
--   **스케줄 관리**: 일별/주별/월별 스케줄을 확인하고, 새로운 PT 세션을 예약합니다.
--   **운동 일지 작성 및 조회**: PT 세션이 끝난 후, 운동 내역과 피드백을 기록하고 과거의 운동 기록을 조회할 수 있습니다.
+-   **회원 관리**: 신규 회원 등록, 정보 수정, 검색 및 보관/삭제 기능을 제공합니다.
+-   **스케줄 관리**: 트레이너별/일자별/주간별 수업 스케줄을 한눈에 파악하고 관리할 수 있습니다.
+-   **수업 및 운동 일지**: 수업별 운동 내용, 세트, 피드백 등을 상세히 기록하고 조회할 수 있습니다.
+-   **대시보드**: 오늘 예정된 수업, 만료 임박 회원 등 주요 정보를 빠르게 확인할 수 있습니다.
 
-## 2. 기술 스택 및 주요 라이브러리
+## 기술 스택
 
--   **Framework**: `Flutter 3.x`
--   **State Management**: `Riverpod`
--   **UI & Components**:
-    -   `lucide_icons`: 깔끔하고 일관된 아이콘 세트
-    -   `table_calendar`: 월간/주간 캘린더 UI
--   **Utilities**:
-    -   `intl`: 날짜 및 시간 포맷팅
+-   **프레임워크**: Flutter
+-   **상태 관리**: Riverpod
+-   **UI**: Material Design 3
+-   **아이콘**: Lucide Icons
 
-## 3. 프로젝트 구조
+---
 
-프로젝트는 기능과 역할에 따라 명확하게 분리된 디렉토리 구조를 가집니다. 이는 유지보수성과 확장성을 높이기 위함입니다.
+## 벡엔드 구현 가이드
 
-```
-/lib
-├── constants/      # 앱 전역에서 사용되는 상수 (색상, 텍스트 스타일 등)
-├── data/           # 임시 데이터 (Mock Data)
-├── models/         # 데이터 모델 클래스 (Member, Schedule 등)
-├── providers/      # Riverpod Provider 정의
-├── repositories/   # 데이터 소스 제어 (API 통신, DB 접근 등)
-├── screens/        # 전체 화면 단위의 UI 위젯
-└── widgets/        # 재사용 가능한 작은 UI 컴포넌트
-```
+이 문서는 프론트엔드 코드 분석을 통해 백엔드 API를 설계하고 구현하는 데 필요한 정보를 제공합니다.
 
--   **`/constants`**: 색상(`app_colors.dart`), 텍스트 스타일(`app_text_styles.dart`), 문자열(`app_strings.dart`) 등 하드코딩을 피하기 위한 값들을 모아둡니다. UI를 수정할 때 일관성을 유지하기 위해 이곳의 값을 사용해야 합니다.
+### 1. 데이터 모델 구조
 
--   **`/data`**: 현재 백엔드 없이 앱을 구동하기 위한 임시 데이터(`mock_data.dart`)가 들어있습니다. 향후 실제 백엔드가 구현되면 이 부분은 제거되거나 테스트용으로만 사용됩니다.
+애플리케이션에서 사용하는 핵심 데이터 모델은 다음과 같습니다. JSON 직렬화/역직렬화를 위한 `toJson`/`fromJson` 메서드가 각 모델에 포함되어 있습니다.
 
--   **`/models`**: 애플리케이션의 핵심 데이터 구조를 정의합니다. 모든 모델 클래스는 불변성(Immutability)을 유지하기 위해 `copyWith` 메서드를 포함하며, 서버 통신을 대비해 `toJson`, `fromJson` 메서드를 구현해두었습니다.
+#### `Member`
 
--   **`/repositories`**: 데이터 소스와의 통신을 담당하는 **데이터 계층**입니다. UI는 Repository가 어디서 데이터를 가져오는지(Mock Data인지, API 서버인지) 알 필요가 없습니다. 데이터 관련 로직은 모두 이곳에서 처리합니다.
+회원의 기본 정보 및 신체 정보를 관리합니다.
 
--   **`/providers`**: **Riverpod 상태 관리의 핵심**입니다. UI와 비즈니스 로직(데이터)을 분리하는 역할을 합니다.
-    -   `repository_providers.dart`: Repository 인스턴스를 생성하고 앱 전역에 제공합니다.
-    -   `home_providers.dart`, `schedule_providers.dart`: Repository로부터 데이터를 가져와 가공한 후, UI가 사용할 최종 상태(State)를 제공합니다. `FutureProvider`, `StateNotifierProvider` 등이 사용됩니다.
+-   `id`: `String` (PK)
+-   `name`: `String`
+-   `phone`: `String`
+-   `email`: `String`
+-   `remainingSessions`: `int` (남은 세션 횟수)
+-   `totalSessions`: `int` (총 등록 횟수)
+-   `registrationDate`: `DateTime`
+-   `notes`: `String` (특이사항, 메모)
+-   `profileImage`: `String?` (프로필 이미지 URL)
+-   `isArchived`: `bool` (보관(비활성) 여부, 기본값 `false`)
+-   **신체 정보 (nullable)**:
+    -   `height`: `double?`
+    -   `weight`: `double?`
+    -   `targetWeight`: `double?`
+    -   `age`: `int?`
+    -   `bodyFat`: `double?`
+    -   `skeletalMuscle`: `double?`
+    -   `targetMuscle`: `double?`
+    -   `activityLevel`: `String?`
+    -   `sleepTime`: `String?`
 
--   **`/screens`**: 사용자에게 보여지는 전체 페이지 단위의 UI입니다. 각 스크린은 `ConsumerWidget` 또는 `ConsumerStatefulWidget`으로 작성되어 `ref.watch`를 통해 Provider가 제공하는 데이터를 구독하고, 데이터가 변경되면 자동으로 UI를 갱신합니다.
+#### `TrainerMemberRelation`
 
--   **`/widgets`**: 여러 화면에서 재사용될 수 있는 작은 UI 조각들입니다. 다이얼로그, 카드, 버튼 등이 포함됩니다. 복잡한 위젯은 하위 디렉토리(예: `member_detail_tabs/`)로 한번 더 그룹화하여 관리합니다.
+트레이너와 회원 간의 '계약' 또는 '소속' 관계를 정의합니다. 한 명의 회원은 여러 트레이너와 관계를 맺을 수 있습니다.
 
-## 4. 아키텍처 및 데이터 흐름 (Riverpod)
+-   `id`: `String` (PK)
+-   `trainerId`: `String` (FK, User/Trainer 모델 참조)
+-   `memberId`: `String` (FK, Member 모델 참조)
+-   `startDate`: `DateTime` (관계 시작일)
+-   `endDate`: `DateTime?` (관계 종료일)
+-   `isActive`: `bool` (현재 유효한 관계인지 여부)
+-   `memberName`: `String?` (JOIN된 데이터, 편의용)
+-   `trainerName`: `String?` (JOIN된 데이터, 편의용)
 
-이 앱은 Riverpod를 사용한 단방향 데이터 흐름 아키텍처를 따릅니다. 이를 이해하는 것이 유지보수의 핵심입니다.
+#### `Schedule`
 
-**`UI` → `Provider` → `Repository` → `Data Source` → (State Update) → `UI`**
+수업 스케줄 정보를 관리합니다. 특정 `TrainerMemberRelation`에 종속됩니다.
 
-1.  **UI (Screen/Widget)**: 사용자가 버튼을 클릭하는 등 이벤트를 발생시킵니다.
-2.  **Provider 호출**: UI는 `ref.read()`나 `ref.watch()`를 통해 Provider에 접근하고, Repository의 메서드를 호출하도록 요청합니다.
-    -   *예시: `ref.read(memberRepositoryProvider).addMember(newMember);`*
-3.  **Repository**: 요청을 받아 데이터 소스(현재는 `mock_data.dart`)의 데이터를 변경(추가, 수정, 삭제)합니다.
-4.  **상태 무효화 (Invalidation)**: 데이터 변경 후, Repository는 이 데이터와 관련된 Provider를 무효화(`ref.invalidate()`)하여 상태가 변경되었음을 Riverpod에 알립니다.
-    -   *예시: `ref.invalidate(allMembersProvider);`*
-5.  **UI 자동 갱신**: Riverpod는 무효화된 Provider를 재실행하여 새로운 데이터를 가져옵니다. 해당 Provider를 `ref.watch`하고 있던 모든 UI는 **자동으로 리빌드**되어 최신 데이터를 화면에 표시합니다.
+-   `id`: `String` (PK)
+-   `relationId`: `String` (FK, TrainerMemberRelation 모델 참조)
+-   `memberId`: `String?` (JOIN된 데이터, 편의용)
+-   `memberName`: `String?` (JOIN된 데이터, 편의용)
+-   `date`: `DateTime` (수업 날짜)
+-   `startTime`: `String` (예: "09:00")
+-   `endTime`: `String` (예: "09:50")
+-   `notes`: `String` (수업 관련 메모)
+-   `reminder`: `String` (알림 설정)
 
-이 구조 덕분에 UI는 상태를 직접 관리할 필요가 없으며, 데이터 로직은 Repository에 캡슐화되어 코드가 명확하고 테스트하기 쉬워집니다.
+#### `WorkoutLog`
 
-## 5. 시작 가이드
+수업 완료 후 작성하는 운동 일지입니다.
 
-1.  **Flutter SDK 설치**: Flutter 개발 환경이 설정되어 있어야 합니다.
-2.  **저장소 클론**: `git clone <repository-url>`
-3.  **패키지 설치**: 프로젝트 루트 디렉토리에서 아래 명령어를 실행합니다.
+-   `id`: `String` (PK)
+-   `memberId`: `String` (FK, Member 모델 참조)
+-   `memberName`: `String`
+-   `date`: `DateTime`
+-   `sessionNumber`: `int` (몇 회차 수업인지)
+-   `exercises`: `List<WorkoutExercise>` (운동 목록)
+-   `overallNotes`: `String` (총평, 피드백)
+-   `reminderForNext`: `String` (다음 수업을 위한 메모)
+-   `photos`: `List<String>` (사진 URL 목록)
+
+#### `WorkoutExercise` / `WorkoutSet`
+
+`WorkoutLog`에 포함되는 상세 운동 및 세트 정보입니다.
+
+-   **WorkoutExercise**: `id`, `name`, `sets: List<WorkoutSet>`, `notes`
+-   **WorkoutSet**: `setNumber`, `reps`, `weight`
+
+### 2. Repository API (엔드포인트 설계 참고)
+
+프론트엔드의 Repository 클래스들은 백엔드 API 엔드포인트와 1:1로 매칭될 수 있습니다.
+
+#### `AuthRepository`
+
+-   `login(email, password)`: `POST /api/auth/login`
+    -   로그인 성공 시 사용자 정보 및 토큰 반환.
+
+#### `RelationRepository`
+
+-   `getActiveRelationsForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/relations?active=true`
+    -   특정 트레이너에게 소속된 모든 활성 계약 목록을 반환합니다.
+-   `createRelation(trainerId, memberId)`: `POST /api/relations`
+    -   Body: `{ "trainerId": "...", "memberId": "..." }`
+    -   새로운 트레이너-회원 관계를 생성합니다.
+-   `deactivateRelation(relationId)`: `PATCH /api/relations/{relationId}/deactivate`
+    -   특정 관계를 비활성화(계약 종료) 처리합니다.
+
+#### `MemberRepository`
+
+-   `getMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members`
+    -   `RelationRepository`를 통해 해당 트레이ナー와 연결된 활성 회원 목록을 조회합니다.
+-   `getArchivedMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members?archived=true`
+    -   보관된 회원 목록을 조회합니다.
+-   `getRenewalNeededMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members?renewal=true`
+    -   남은 세션 횟수가 적은(예: 3회 이하) 회원 목록을 반환합니다.
+-   `addMember(member)`: `POST /api/members`
+    -   신규 회원을 시스템에 등록합니다.
+-   `updateMemberNotes(memberId, newNotes)`: `PATCH /api/members/{memberId}/notes`
+    -   Body: `{ "notes": "..." }`
+-   `archiveMember(memberId)`: `PATCH /api/members/{memberId}/archive`
+    -   회원을 보관 상태로 변경합니다.
+-   `unarchiveMember(memberId)`: `PATCH /api/members/{memberId}/unarchive`
+    -   회원을 다시 활성 상태로 복원합니다.
+-   `deleteMember(memberId)`: `DELETE /api/members/{memberId}`
+    -   회원 정보를 영구 삭제합니다.
+
+#### `ScheduleRepository`
+
+-   `getSchedulesForTrainerByDate(trainerId, dateStr)`: `GET /api/trainers/{trainerId}/schedules?date={dateStr}`
+    -   특정 트레이너의 특정 날짜 스케줄 목록을 반환합니다.
+-   `getUpcomingSchedulesForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/schedules/upcoming`
+    -   오늘 예정된 수업 중 가장 가까운 수업 1개를 반환합니다.
+-   `getSchedulesByMember(memberId)`: `GET /api/members/{memberId}/schedules`
+    -   특정 회원의 전체 수업 이력을 반환합니다.
+-   `checkConflictForTrainer(...)`: `GET /api/trainers/{trainerId}/schedules/check-conflict?date=...&startTime=...&endTime=...`
+    -   새로운 스케줄 등록 시 중복 여부를 확인합니다.
+-   `addSchedule(schedule)`: `POST /api/schedules`
+    -   새로운 수업 스케줄을 추가합니다.
+
+#### `WorkoutLogRepository`
+
+-   `getLogBySchedule(memberId, date)`: `GET /api/logs?memberId={memberId}&date={date}`
+    -   특정 회원의 특정 날짜 운동 일지를 조회합니다.
+
+## 프로젝트 실행 방법
+
+1.  Flutter SDK 설치
+2.  `pubspec.yaml` 파일이 있는 프로젝트 루트에서 다음 명령어 실행:
     ```bash
     flutter pub get
     ```
-4.  **앱 실행**: 연결된 디바이스나 에뮬레이터에서 앱을 실행합니다.
+3.  연결된 디바이스 또는 에뮬레이터에서 앱 실행:
     ```bash
     flutter run
     ```
-    -   **데모 계정**: 로그인 화면에서 아무 버튼이나 누르면 `test`/`1234` 계정으로 로그인됩니다.
 
-## 6. 향후 유지보수 가이드
-
--   **새로운 기능(화면) 추가 시**:
-    1.  `/screens`에 새로운 화면 파일을 생성합니다.
-    2.  필요한 데이터가 있다면, `/repositories`에 데이터 로직을 추가하고 `/providers`에 새 Provider를 만듭니다.
-    3.  새로운 화면에서 `ref.watch`를 통해 Provider의 데이터를 사용합니다.
-
--   **UI 컴포넌트 수정 시**:
-    -   전체 페이지라면 `/screens`에서 해당 파일을 찾습니다.
-    -   재사용되는 작은 부분이라면 `/widgets`에서 관련 파일을 찾습니다.
-
--   **데이터 로직 변경 시**:
-    -   데이터를 가져오거나 변경하는 로직은 `/repositories` 디렉토리의 파일들을 수정하면 됩니다.
-
--   **백엔드 API 연동 방법**:
-    1.  `http` 또는 `dio` 패키지를 `pubspec.yaml`에 추가합니다.
-    2.  `/repositories` 디렉토리의 각 Repository 메서드 내부를 수정합니다.
-    3.  `Future.delayed`와 `mockMembers`를 사용하던 부분을 실제 API를 호출하는 코드로 교체합니다.
-    4.  **중요**: Repository 내부만 수정하면, Provider나 UI 코드는 거의 변경할 필요 없이 실제 서버 데이터와 연동됩니다. 이것이 현재 아키텍처의 가장 큰 장점입니다.
+---
+*이 문서는 Gemini에 의해 자동으로 생성되었습니다.*
