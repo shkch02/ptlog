@@ -8,6 +8,7 @@ class Member {
   final DateTime registrationDate;
   final String notes;
   final String? profileImage;
+  final bool isArchived; // 보관(비활성) 상태 여부
 
   // --- 추가된 신체 정보 필드 (타입 변경) ---
   final double? height;        // 키
@@ -30,6 +31,7 @@ class Member {
     required this.registrationDate,
     required this.notes,
     this.profileImage,
+    this.isArchived = false, // 기본값: 활성 상태
     // --- 생성자 ---
     this.height,
     this.weight,
@@ -52,6 +54,7 @@ class Member {
     DateTime? registrationDate,
     String? notes,
     String? profileImage,
+    bool? isArchived,
     // --- copyWith 타입 변경 ---
     double? height,
     double? weight,
@@ -73,6 +76,7 @@ class Member {
       registrationDate: registrationDate ?? this.registrationDate,
       notes: notes ?? this.notes,
       profileImage: profileImage ?? this.profileImage,
+      isArchived: isArchived ?? this.isArchived,
       // --- copyWith 적용 ---
       height: height ?? this.height,
       weight: weight ?? this.weight,
@@ -97,6 +101,7 @@ class Member {
       'registrationDate': registrationDate.toIso8601String(),
       'notes': notes,
       'profileImage': profileImage,
+      'isArchived': isArchived,
       // --- toJson 타입 변경 ---
       'height': height,
       'weight': weight,
@@ -121,6 +126,7 @@ class Member {
       registrationDate: DateTime.parse(json['registrationDate']),
       notes: json['notes'],
       profileImage: json['profileImage'],
+      isArchived: json['isArchived'] ?? false,
       // --- fromJson 타입 변환 ---
       height: (json['height'] as num?)?.toDouble(),
       weight: (json['weight'] as num?)?.toDouble(),

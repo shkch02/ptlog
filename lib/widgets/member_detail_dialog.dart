@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
 import 'package:ptlog/widgets/member_detail_tabs/basic_info_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/detailed_memo_tab.dart';
-import 'package:ptlog/widgets/member_detail_tabs/payment_tab.dart';
+import 'package:ptlog/widgets/member_detail_tabs/settings_tab.dart';
 import 'package:ptlog/widgets/member_detail_tabs/pt_sessions_tab.dart';
 import 'package:ptlog/models/index.dart';
 
 class MemberDetailDialog extends ConsumerStatefulWidget {
   final Member member;
+  final VoidCallback? onMemberUpdated;
 
-  const MemberDetailDialog({super.key, required this.member});
+  const MemberDetailDialog({
+    super.key,
+    required this.member,
+    this.onMemberUpdated,
+  });
 
   @override
   ConsumerState<MemberDetailDialog> createState() => _MemberDetailDialogState();
@@ -23,33 +29,11 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
   late TabController _tabController;
   late TextEditingController _notesController;
 
-  // [수정] 스케줄 리스트 변수 삭제 (_memberSchedules 불필요)
-  List<PaymentLog> _memberPayments = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _notesController = TextEditingController(text: widget.member.notes);
-
-    _loadAsyncData();
-  }
-
-  Future<void> _loadAsyncData() async {
-    // [수정] getPaymentHistory는 삭제되었으므로 관련 로직 제거
-    // final memberRepo = ref.read(memberRepositoryProvider);
-    // final payments = await memberRepo.getPaymentHistory(widget.member.id);
-    
-    // 임시로 빈 리스트를 사용하도록 설정
-    final payments = <PaymentLog>[];
-
-    if (mounted) {
-      setState(() {
-        _memberPayments = payments; // 결과 할당
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -112,28 +96,32 @@ class _MemberDetailDialogState extends ConsumerState<MemberDetailDialog>
                 Tab(text: 'PT세션'),
                 Tab(text: '기본정보'),
                 Tab(text: '상세메모'),
-                Tab(text: '결제'),
+                Tab(text: '설정'),
               ],
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // [수정] memberSchedules 대신 member 객체를 직접 전달
-                        PtSessionsTab(member: widget.member),
-                        
-                        BasicInfoTab(member: widget.member),
-                        DetailedMemoTab(
-                          notesController: _notesController,
-                          memberRepo: memberRepo,
-                          member: widget.member,
-                        ),
-                        PaymentTab(memberPayments: _memberPayments),
-                      ],
-                    ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  PtSessionsTab(member: widget.member),
+                  BasicInfoTab(member: widget.member),
+                  DetailedMemoTab(
+                    notesController: _notesController,
+                    memberRepo: memberRepo,
+                    member: widget.member,
+                  ),
+                  SettingsTab(
+                    member: widget.member,
+                    memberRepo: memberRepo,
+                    onMemberUpdated: () {
+                      // Provider 무효화하여 회원 목록 새로고침
+                      ref.invalidate(membersForTrainerProvider);
+                      widget.onMemberUpdated?.call();
+                    },
+                  ),
+                ],
+              ),
             ),
             Align(
               alignment: Alignment.centerRight,
