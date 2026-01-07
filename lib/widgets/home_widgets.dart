@@ -121,7 +121,7 @@ class HomeScheduleCard extends StatelessWidget {
               ],
       ),
       child: InkWell(
-        onTap: onMemberTap,
+        onTap: onStartTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -190,13 +190,16 @@ class HomeScheduleCard extends StatelessWidget {
                 ),
               ),
 
-              // 시작 버튼
-              if (!isPast)
-                IconButton(
-                  onPressed: onStartTap,
-                  icon: const Icon(LucideIcons.playCircle, color: AppColors.primary, size: 32),
-                  tooltip: '수업 시작',
+              // 회원 정보 버튼
+              IconButton(
+                onPressed: onMemberTap,
+                icon: Icon(
+                  LucideIcons.info,
+                  color: isPast ? AppColors.textSecondary : AppColors.primary,
+                  size: 24,
                 ),
+                tooltip: '회원 정보',
+              ),
             ],
           ),
         ),
