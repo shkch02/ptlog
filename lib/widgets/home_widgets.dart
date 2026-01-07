@@ -87,6 +87,7 @@ class HomeScheduleCard extends StatelessWidget {
   final bool isPast;
   final VoidCallback onMemberTap;
   final VoidCallback onStartTap;
+  final String? memberPhone;
 
   const HomeScheduleCard({
     super.key,
@@ -94,6 +95,7 @@ class HomeScheduleCard extends StatelessWidget {
     required this.isPast,
     required this.onMemberTap,
     required this.onStartTap,
+    this.memberPhone,
   });
 
   @override
@@ -171,9 +173,18 @@ class HomeScheduleCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          schedule.memberName?? '이름 없음',
+                          schedule.memberName ?? '이름 없음',
                           style: AppTextStyles.subtitle1.copyWith(color: textColor),
                         ),
+                        if (memberPhone != null && memberPhone!.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            memberPhone!,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 8),
                         if (!isPast)
                           const Icon(LucideIcons.dumbbell, size: 14, color: AppColors.primary),

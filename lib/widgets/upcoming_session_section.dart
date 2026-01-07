@@ -9,6 +9,7 @@ typedef OnMemberInfoTap = void Function(String memberId);
 
 class UpcomingSessionSection extends StatelessWidget {
   final List<Schedule> schedules;
+  final List<Member> members;
   final VoidCallback onManualStart;
   final String? emptyMessage;
   final OnMemberInfoTap onMemberInfoTap;
@@ -16,10 +17,21 @@ class UpcomingSessionSection extends StatelessWidget {
   const UpcomingSessionSection({
     super.key,
     required this.schedules,
+    required this.members,
     required this.onManualStart,
     this.emptyMessage,
     required this.onMemberInfoTap,
   });
+
+  // memberId로 Member를 찾는 헬퍼 메서드
+  Member? _findMember(String? memberId) {
+    if (memberId == null) return null;
+    try {
+      return members.firstWhere((m) => m.id == memberId);
+    } catch (_) {
+      return null;
+    }
+  }
 
   String _getDynamicHeaderText() {
     if (schedules.isEmpty) {
@@ -131,6 +143,9 @@ class UpcomingSessionSection extends StatelessWidget {
   }
 
   Widget _buildSessionCard(BuildContext context, Schedule schedule) {
+    final member = _findMember(schedule.memberId);
+    final phoneNumber = member?.phone ?? '';
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
@@ -216,9 +231,23 @@ class UpcomingSessionSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${schedule.memberName ?? '이름 없음'} 회원님',
-                        style: AppTextStyles.h3.copyWith(color: AppColors.white),
+                      Row(
+                        children: [
+                          Text(
+                            '${schedule.memberName ?? '이름 없음'} 회원님',
+                            style: AppTextStyles.h3.copyWith(color: AppColors.white),
+                          ),
+                          if (phoneNumber.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              phoneNumber,
+                              style: AppTextStyles.body.copyWith(
+                                color: AppColors.white.withOpacity(0.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       Text(
                         schedule.notes.isNotEmpty ? schedule.notes : '특이사항 없음',

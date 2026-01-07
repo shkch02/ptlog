@@ -52,19 +52,22 @@ class HomeScreen extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final schedule = schedules[index];
                       final isPast = schedule.startTime.compareTo(nowTimeStr) < 0;
-                      
+
+                      // memberId로 회원 조회하여 전화번호 가져오기
+                      final member = _findMember(allMembers, schedule.memberId);
+
                       // 3. 스케줄 카드 위젯
                       return HomeScheduleCard(
                         schedule: schedule,
                         isPast: isPast,
+                        memberPhone: member?.phone,
                         onMemberTap: () {
-                          try {
-                            final member = allMembers.firstWhere((m) => m.id == schedule.memberId);
+                          if (member != null) {
                             showDialog(
                               context: context,
                               builder: (context) => MemberDetailDialog(member: member),
                             );
-                          } catch (_) {}
+                          }
                         },
                         onStartTap: () {
                           Navigator.push(
@@ -81,6 +84,16 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  // memberId로 Member를 찾는 헬퍼 메서드
+  Member? _findMember(List<Member> members, String? memberId) {
+    if (memberId == null) return null;
+    try {
+      return members.firstWhere((m) => m.id == memberId);
+    } catch (_) {
+      return null;
+    }
   }
 
   void _showManualSessionDialog(BuildContext context, List<Member> allMembers) {
