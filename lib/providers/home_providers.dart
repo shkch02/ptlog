@@ -46,9 +46,8 @@ final todaySchedulesProvider = FutureProvider<List<Schedule>>((ref) async {
   final now = DateTime.now();
   final todayStr = DateFormat('yyyy-MM-dd').format(now); 
   
-  // 2. 트레이너 ID 가져오기 (예시: authProvider 등을 통해 가져오거나 임시 ID 사용)
-  // 실제 프로젝트에서는 로그인된 트레이너의 ID를 ref.watch를 통해 가져와야 합니다.
-  const trainerId = 'trainer_01'; 
+  // 2. 트레이너 ID 가져오기
+  final trainerId = ref.watch(currentTrainerIdProvider); 
 
   // 3. 만들어둔 메서드 호출 (이것이 에러를 해결하고 로직을 통합하는 핵심입니다)
   return await scheduleRepo.getSchedulesForTrainerByDate(trainerId, todayStr);
