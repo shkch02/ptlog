@@ -6,6 +6,7 @@ import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/models/member.dart';
 import 'package:ptlog/providers/home_providers.dart';
 import 'package:ptlog/providers/repository_providers.dart';
+import 'package:ptlog/widgets/archived_members_dialog.dart';
 import 'package:ptlog/widgets/member_add_dialog.dart';
 import 'package:ptlog/widgets/member_detail_dialog.dart';
 
@@ -22,7 +23,19 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   void _showMemberDetail(BuildContext context, Member member) {
     showDialog(
       context: context,
-      builder: (context) => MemberDetailDialog(member: member),
+      builder: (context) => MemberDetailDialog(
+        member: member,
+        onMemberUpdated: () {
+          ref.invalidate(membersForTrainerProvider);
+        },
+      ),
+    );
+  }
+
+  void _showArchivedMembersDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const ArchivedMembersDialog(),
     );
   }
 
@@ -113,8 +126,12 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
-                  itemCount: filteredMembers.length,
+                  itemCount: filteredMembers.length + 1, // +1 for archived button
                   itemBuilder: (context, index) {
+                    // 마지막 아이템: 보관된 회원 버튼
+                    if (index == filteredMembers.length) {
+                      return _buildArchivedMembersButton();
+                    }
                     final member = filteredMembers[index];
                     return _buildRichMemberCard(member);
                   },
@@ -242,6 +259,46 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       child: Text(
         '$remaining/$total 회 남음',
         style: AppTextStyles.button.copyWith(fontSize: 12, color: color),
+      ),
+    );
+  }
+
+  Widget _buildArchivedMembersButton() {
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 24),
+      child: InkWell(
+        onTap: _showArchivedMembersDialog,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.disabled),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                LucideIcons.archive,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '보관된 회원 관리',
+                style: AppTextStyles.subtitle2.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
