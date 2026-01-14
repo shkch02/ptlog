@@ -20,6 +20,9 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
   final TextEditingController _feedbackController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
 
+  // 각 운동별 저장된 필기 이미지 경로
+  final Map<int, String> _handwritingPaths = {};
+
   @override
   void dispose() {
     _feedbackController.dispose();
@@ -61,9 +64,15 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
                   index: index,
                   exercise: _exercises[index],
                   showRemoveButton: _exercises.length > 1,
-                  onRemove: () => setState(() => _exercises.removeAt(index)),
+                  onRemove: () => setState(() {
+                    _exercises.removeAt(index);
+                    _handwritingPaths.remove(index);
+                  }),
                   onAddSet: () => setState(() => _exercises[index].sets.add(SetForm())),
                   onRemoveSet: (setIndex) => setState(() => _exercises[index].sets.removeAt(setIndex)),
+                  onHandwritingSaved: (path) {
+                    setState(() => _handwritingPaths[index] = path);
+                  },
                 );
               },
             ),
