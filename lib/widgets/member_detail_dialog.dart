@@ -1,3 +1,4 @@
+// 회원 상세 정보를 보여주는 다이얼로그 위젯
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_colors.dart';

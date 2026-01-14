@@ -1,3 +1,4 @@
+// 신규 회원을 추가하는 다이얼로그 위젯
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';

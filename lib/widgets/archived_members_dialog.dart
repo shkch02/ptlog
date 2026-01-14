@@ -1,3 +1,5 @@
+// 보관된 회원 목록을 보여주는 다이얼로그 위젯입니다.
+// 보관된 회원 목록을 보여주는 다이얼로그 위젯
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';

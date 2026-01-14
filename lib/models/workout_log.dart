@@ -1,3 +1,4 @@
+// 운동일지 정보를 관리하는 WorkoutLog 데이터 모델을 정의합니다.
 class WorkoutExercise {
   final String id;
   final String name;

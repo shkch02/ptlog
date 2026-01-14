@@ -1,3 +1,4 @@
+// 앱에서 사용하는 텍스트 스타일(글꼴 크기, 굵기 등)을 정의합니다.
 import 'package:flutter/material.dart';
 import 'package:ptlog/constants/app_colors.dart';
 

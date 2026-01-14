@@ -1,3 +1,4 @@
+// 회원 정보와 관련된 데이터 처리를 담당하는 리포지토리입니다.
 import 'package:ptlog/repositories/relation_repository.dart';
 
 import '../models/index.dart';

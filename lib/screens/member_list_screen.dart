@@ -1,3 +1,4 @@
+// 회원 목록을 보여주는 화면을 구성하는 위젯입니다.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';

@@ -1,3 +1,4 @@
+// 회원 정보를 관리하는 Member 데이터 모델을 정의합니다.
 class Member {
   final String id;
   final String name;

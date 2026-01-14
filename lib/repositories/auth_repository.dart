@@ -1,4 +1,5 @@
 
+// 인증(로그인, 로그아웃 등) 관련 데이터 처리를 담당하는 리포지토리입니다.
 class AuthRepository {
   AuthRepository();
 

@@ -1,3 +1,4 @@
+// 예정된 세션 목록 섹션 위젯
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';

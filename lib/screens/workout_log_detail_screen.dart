@@ -1,3 +1,4 @@
+// 작성된 운동일지의 상세 내용을 보여주는 화면입니다.
 // lib/screens/workout_log_detail_screen.dart
 
 import 'package:flutter/material.dart';

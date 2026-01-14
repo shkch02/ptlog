@@ -1,3 +1,4 @@
+// 앱에서 사용하는 패딩, 간격, 반지름 등 크기 관련 상수를 정의합니다.
 class AppDimensions {
   // Padding
   static const double paddingSmall = 8.0;

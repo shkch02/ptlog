@@ -1,3 +1,4 @@
+// 홈 화면의 상태(예: 선택된 날짜)를 관리하는 프로바이더를 정의합니다.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/data/mock_data.dart';
 import 'package:ptlog/models/index.dart';

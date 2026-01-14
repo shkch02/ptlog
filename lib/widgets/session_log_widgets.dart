@@ -1,3 +1,4 @@
+// 세션 로그에 사용되는 위젯 모음
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';

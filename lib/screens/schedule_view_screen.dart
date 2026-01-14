@@ -1,3 +1,4 @@
+// 전체 스케줄을 월별로 보여주는 화면을 구성하는 위젯입니다.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

@@ -1,3 +1,4 @@
+// 앱에서 사용하는 주요 색상을 정의합니다.
 import 'package:flutter/material.dart';
 
 class AppColors {

@@ -1,3 +1,4 @@
+// 운동일지를 작성하는 화면을 구성하는 위젯입니다.
 // lib/screens/session_log_screen.dart
 
 import 'package:flutter/material.dart';
