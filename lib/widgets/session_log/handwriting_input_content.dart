@@ -1,7 +1,6 @@
 // 필기 모드 입력 위젯
 // lib/widgets/session_log/handwriting_input_content.dart
 
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -78,20 +77,16 @@ class _HandwritingInputContentState extends State<HandwritingInputContent> {
 
   Future<void> _loadBackgroundImage() async {
     try {
-      Uint8List bytes;
+      Uint8List? bytes;
 
       // 기존 저장된 이미지가 있으면 해당 이미지 로드, 없으면 템플릿 로드
       if (widget.initialImagePath != null) {
-        final file = File(widget.initialImagePath!);
-        if (await file.exists()) {
-          bytes = await file.readAsBytes();
-        } else {
-          // 파일이 없으면 템플릿 로드
-          final ByteData data = await rootBundle.load(widget.templateAssetPath);
-          bytes = data.buffer.asUint8List();
-        }
-      } else {
-        // 에셋에서 템플릿 이미지 로드
+        // HandwritingService를 통해 로드 (웹: Data URI 디코딩, 모바일: 파일 읽기)
+        bytes = await HandwritingService.loadDrawing(widget.initialImagePath!);
+      }
+
+      // 저장된 이미지가 없거나 로드 실패 시 템플릿 로드
+      if (bytes == null) {
         final ByteData data = await rootBundle.load(widget.templateAssetPath);
         bytes = data.buffer.asUint8List();
       }

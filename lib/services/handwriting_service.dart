@@ -1,20 +1,27 @@
 // 필기 이미지 저장 서비스
 // lib/services/handwriting_service.dart
 
-import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_painter_v2/flutter_painter.dart';
-import 'package:path_provider/path_provider.dart';
+
+// dart:io와 path_provider는 웹에서 사용 불가하므로 조건부 import
+import 'handwriting_service_io.dart'
+    if (dart.library.html) 'handwriting_service_web.dart' as platform;
 
 class HandwritingService {
-  /// 필기 이미지를 로컬 파일시스템에 저장
+  /// 필기 이미지를 저장
   ///
   /// [controller] - PainterController 인스턴스
   /// [size] - 렌더링할 이미지 크기 (기본값: 800x600)
   ///
-  /// 반환값: 저장된 파일의 절대 경로 또는 실패 시 null
+  /// 반환값:
+  /// - 웹: Base64 Data URI 문자열 ('data:image/png;base64,...')
+  /// - 모바일: 저장된 파일의 절대 경로
+  /// - 실패 시: null
   static Future<String?> saveDrawing(
     PainterController controller, {
     Size size = const Size(800, 600),
@@ -35,45 +42,37 @@ class HandwritingService {
 
       final Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      // 저장 경로 생성
-      final String filePath = await _generateFilePath();
-
-      // 파일 저장
-      final File file = File(filePath);
-      await file.writeAsBytes(pngBytes);
-
-      debugPrint('HandwritingService: 이미지 저장 완료 - $filePath');
-      return filePath;
+      // 플랫폼에 따라 다른 저장 방식 사용
+      if (kIsWeb) {
+        // 웹: Base64 Data URI로 변환
+        final String base64String = base64Encode(pngBytes);
+        final String dataUri = 'data:image/png;base64,$base64String';
+        debugPrint('HandwritingService: 이미지 Data URI 생성 완료');
+        return dataUri;
+      } else {
+        // 모바일: 파일로 저장
+        return await platform.saveToFile(pngBytes);
+      }
     } catch (e) {
       debugPrint('HandwritingService: 저장 실패 - $e');
       return null;
     }
   }
 
-  /// 고유한 파일 경로 생성
-  static Future<String> _generateFilePath() async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final String handwritingDir = '${directory.path}/handwriting';
-
-    // 디렉토리가 없으면 생성
-    final Directory dir = Directory(handwritingDir);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-
-    // 타임스탬프 기반 파일명 생성
-    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    return '$handwritingDir/workout_note_$timestamp.png';
-  }
-
   /// 저장된 필기 이미지 로드
-  static Future<Uint8List?> loadDrawing(String filePath) async {
+  ///
+  /// 웹에서 Data URI가 전달되면 Base64 디코딩하여 반환
+  /// 모바일에서 파일 경로가 전달되면 파일을 읽어서 반환
+  static Future<Uint8List?> loadDrawing(String pathOrDataUri) async {
     try {
-      final File file = File(filePath);
-      if (await file.exists()) {
-        return await file.readAsBytes();
+      if (kIsWeb || pathOrDataUri.startsWith('data:image/png;base64,')) {
+        // Data URI에서 Base64 디코딩
+        final String base64String = pathOrDataUri.split(',').last;
+        return base64Decode(base64String);
+      } else {
+        // 모바일: 파일에서 로드
+        return await platform.loadFromFile(pathOrDataUri);
       }
-      return null;
     } catch (e) {
       debugPrint('HandwritingService: 로드 실패 - $e');
       return null;
@@ -81,15 +80,17 @@ class HandwritingService {
   }
 
   /// 필기 이미지 삭제
-  static Future<bool> deleteDrawing(String filePath) async {
+  ///
+  /// 웹에서는 파일 시스템이 없으므로 항상 true 반환
+  static Future<bool> deleteDrawing(String pathOrDataUri) async {
     try {
-      final File file = File(filePath);
-      if (await file.exists()) {
-        await file.delete();
-        debugPrint('HandwritingService: 이미지 삭제 완료 - $filePath');
+      if (kIsWeb || pathOrDataUri.startsWith('data:image/png;base64,')) {
+        // 웹: Data URI는 메모리에만 존재하므로 삭제할 필요 없음
         return true;
+      } else {
+        // 모바일: 파일 삭제
+        return await platform.deleteFile(pathOrDataUri);
       }
-      return false;
     } catch (e) {
       debugPrint('HandwritingService: 삭제 실패 - $e');
       return false;
@@ -97,22 +98,15 @@ class HandwritingService {
   }
 
   /// 모든 필기 이미지 목록 조회
+  ///
+  /// 웹에서는 빈 리스트 반환 (파일 시스템 접근 불가)
   static Future<List<String>> getAllDrawings() async {
+    if (kIsWeb) {
+      // 웹: 파일 시스템 접근 불가
+      return [];
+    }
     try {
-      final Directory directory = await getApplicationDocumentsDirectory();
-      final String handwritingDir = '${directory.path}/handwriting';
-
-      final Directory dir = Directory(handwritingDir);
-      if (!await dir.exists()) {
-        return [];
-      }
-
-      final List<FileSystemEntity> files = await dir.list().toList();
-      return files
-          .whereType<File>()
-          .where((file) => file.path.endsWith('.png'))
-          .map((file) => file.path)
-          .toList();
+      return await platform.getAllDrawingFiles();
     } catch (e) {
       debugPrint('HandwritingService: 목록 조회 실패 - $e');
       return [];
@@ -120,23 +114,14 @@ class HandwritingService {
   }
 
   /// 필기 이미지 저장 디렉토리 용량 계산 (bytes)
+  ///
+  /// 웹에서는 0 반환
   static Future<int> getStorageUsage() async {
+    if (kIsWeb) {
+      return 0;
+    }
     try {
-      final Directory directory = await getApplicationDocumentsDirectory();
-      final String handwritingDir = '${directory.path}/handwriting';
-
-      final Directory dir = Directory(handwritingDir);
-      if (!await dir.exists()) {
-        return 0;
-      }
-
-      int totalSize = 0;
-      await for (final entity in dir.list(recursive: true)) {
-        if (entity is File) {
-          totalSize += await entity.length();
-        }
-      }
-      return totalSize;
+      return await platform.calculateStorageUsage();
     } catch (e) {
       debugPrint('HandwritingService: 용량 계산 실패 - $e');
       return 0;
@@ -144,17 +129,14 @@ class HandwritingService {
   }
 
   /// 모든 필기 이미지 삭제 (캐시 정리)
+  ///
+  /// 웹에서는 항상 true 반환
   static Future<bool> clearAllDrawings() async {
-    try {
-      final Directory directory = await getApplicationDocumentsDirectory();
-      final String handwritingDir = '${directory.path}/handwriting';
-
-      final Directory dir = Directory(handwritingDir);
-      if (await dir.exists()) {
-        await dir.delete(recursive: true);
-        debugPrint('HandwritingService: 모든 필기 이미지 삭제 완료');
-      }
+    if (kIsWeb) {
       return true;
+    }
+    try {
+      return await platform.clearAllFiles();
     } catch (e) {
       debugPrint('HandwritingService: 전체 삭제 실패 - $e');
       return false;
