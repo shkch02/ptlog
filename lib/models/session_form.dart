@@ -10,7 +10,7 @@ class ExerciseForm {
   List<SetForm> sets = [SetForm()];
   List<String> photos = [];
 
-  /// 세트 입력 모드 (디지털 입력 또는 필기 입력)
+  /// 세트 입력 모드 기본값 (디지털 입력 또는 필기 입력)
   SetInputMode setInputMode = SetInputMode.handwriting;
 
   /// 필기 모드 사용 시 저장된 이미지 경로
