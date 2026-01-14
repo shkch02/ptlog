@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../models/index.dart'; // Schedule
-import '../widgets/session_log_widgets.dart'; // 분리한 위젯 import
+import '../models/index.dart';
+import '../widgets/session_log_widgets.dart';
 
 class SessionLogScreen extends StatefulWidget {
   final Schedule schedule;
@@ -19,9 +19,6 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
   final List<ExerciseForm> _exercises = [ExerciseForm()];
   final TextEditingController _feedbackController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
-
-  // 각 운동별 저장된 필기 이미지 경로
-  final Map<int, String> _handwritingPaths = {};
 
   @override
   void dispose() {
@@ -38,9 +35,7 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('임시 저장되었습니다.')));
-            },
+            onPressed: _saveDraft,
             child: const Text('임시저장', style: TextStyle(fontSize: 14)),
           ),
         ],
@@ -64,14 +59,12 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
                   index: index,
                   exercise: _exercises[index],
                   showRemoveButton: _exercises.length > 1,
-                  onRemove: () => setState(() {
-                    _exercises.removeAt(index);
-                    _handwritingPaths.remove(index);
-                  }),
+                  onRemove: () => setState(() => _exercises.removeAt(index)),
                   onAddSet: () => setState(() => _exercises[index].sets.add(SetForm())),
                   onRemoveSet: (setIndex) => setState(() => _exercises[index].sets.removeAt(setIndex)),
                   onHandwritingSaved: (path) {
-                    setState(() => _handwritingPaths[index] = path);
+                    // 필기 저장 시 UI 갱신 (뱃지 표시용)
+                    setState(() {});
                   },
                 );
               },
@@ -117,12 +110,39 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
     );
   }
 
+  void _saveDraft() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('임시 저장되었습니다.')),
+    );
+  }
+
+  void _submitWorkoutLog() {
+    // TODO: 실제 저장 로직 구현
+    // 각 운동의 setInputMode와 handwritingImagePath를 확인하여 적절히 처리
+    for (final exercise in _exercises) {
+      if (exercise.setInputMode == SetInputMode.handwriting) {
+        // 필기 모드: handwritingImagePath 사용
+        debugPrint('운동: ${exercise.name}, 필기 이미지: ${exercise.handwritingImagePath}');
+      } else {
+        // 디지털 모드: sets 데이터 사용
+        debugPrint('운동: ${exercise.name}, 세트 수: ${exercise.sets.length}');
+      }
+    }
+    Navigator.pop(context);
+  }
+
   Widget _buildBottomActions(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
       child: SafeArea(
         child: Row(
@@ -130,12 +150,16 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
             Expanded(
               flex: 1,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: 카카오톡 공유 기능
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFEE500),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: const Icon(LucideIcons.share2, size: 20),
               ),
@@ -144,13 +168,22 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
             Expanded(
               flex: 3,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: _submitWorkoutLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[700],
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: const Text('작성 완료', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  '작성 완료',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

@@ -1,4 +1,6 @@
 // 세션 로그에 사용되는 위젯 모음
+// lib/widgets/session_log_widgets.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -6,9 +8,6 @@ import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/widgets/session_log/handwriting_input_content.dart';
 import '../models/index.dart';
-
-/// 입력 모드 열거형
-enum InputMode { standard, handwriting }
 
 class SessionLogHeader extends StatelessWidget {
   final Schedule schedule;
@@ -54,6 +53,13 @@ class SessionLogHeader extends StatelessWidget {
   }
 }
 
+/// 개별 운동 카드 위젯
+///
+/// 구조:
+/// - 헤더 (운동 번호, 삭제 버튼)
+/// - 공통 정보 섹션 (운동명, 부위, 사진) - 항상 표시
+/// - 세트 입력 모드 토글 (디지털/필기)
+/// - 세트 입력 영역 (모드에 따라 변경)
 class ExerciseCard extends StatefulWidget {
   final int index;
   final ExerciseForm exercise;
@@ -79,9 +85,6 @@ class ExerciseCard extends StatefulWidget {
 }
 
 class _ExerciseCardState extends State<ExerciseCard> {
-  InputMode _inputMode = InputMode.standard;
-  String? _savedHandwritingPath;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -90,27 +93,51 @@ class _ExerciseCardState extends State<ExerciseCard> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.disabled),
         boxShadow: [
-          BoxShadow(color: AppColors.black.withAlpha(8), blurRadius: 8, offset: const Offset(0, 4))
+          BoxShadow(
+            color: AppColors.black.withAlpha(8),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더 영역
+          // ========== 1. 헤더 영역 ==========
           _buildHeader(),
-          // 모드 토글 버튼
-          _buildModeToggle(),
-          // 모드에 따른 콘텐츠
+
+          // ========== 2. 공통 정보 섹션 (항상 표시) ==========
+          _buildCommonInfoSection(),
+
+          // ========== 3. 구분선 + 세트 기록 라벨 ==========
+          _buildSetSectionDivider(),
+
+          // ========== 4. 세트 입력 모드 토글 ==========
+          _buildSetInputModeToggle(),
+
+          // ========== 5. 세트 입력 영역 (모드에 따라 변경) ==========
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: _inputMode == InputMode.standard
-                ? _buildStandardContent()
-                : _buildHandwritingContent(),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axisAlignment: -1,
+                  child: child,
+                ),
+              );
+            },
+            child: widget.exercise.setInputMode == SetInputMode.digital
+                ? _buildDigitalSetInput()
+                : _buildHandwritingSetInput(),
           ),
         ],
       ),
     );
   }
 
+  /// 헤더 영역: 운동 번호 + 필기 저장 뱃지 + 삭제 버튼
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
@@ -121,8 +148,8 @@ class _ExerciseCardState extends State<ExerciseCard> {
             children: [
               Text('운동 ${widget.index + 1}', style: AppTextStyles.subtitle1),
               const SizedBox(width: 8),
-              // 저장된 필기 표시 뱃지
-              if (_savedHandwritingPath != null)
+              // 필기 저장 완료 뱃지
+              if (widget.exercise.handwritingImagePath != null)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
@@ -154,9 +181,83 @@ class _ExerciseCardState extends State<ExerciseCard> {
     );
   }
 
-  Widget _buildModeToggle() {
+  /// 공통 정보 섹션: 운동 부위, 운동 종목, 사진 - 항상 표시됨
+  Widget _buildCommonInfoSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 운동 부위 / 종목 입력
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _SimpleTextField(
+                  label: '운동 부위',
+                  hint: '등',
+                  initialValue: widget.exercise.targetPart,
+                  onChanged: (v) => widget.exercise.targetPart = v,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: _SimpleTextField(
+                  label: '운동 종목',
+                  hint: '랫 풀 다운',
+                  initialValue: widget.exercise.name,
+                  onChanged: (v) => widget.exercise.name = v,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 사진 슬롯
+          Row(
+            children: const [
+              _PhotoSlot(),
+              SizedBox(width: 12),
+              _PhotoSlot(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 세트 기록 섹션 구분선 + 라벨
+  Widget _buildSetSectionDivider() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border(
+          top: BorderSide(color: AppColors.disabled.withAlpha(100)),
+          bottom: BorderSide(color: AppColors.disabled.withAlpha(100)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.clipboardList, size: 14, color: AppColors.textLight),
+          const SizedBox(width: 6),
+          Text(
+            '세트 기록',
+            style: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textLight,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 세트 입력 모드 토글 버튼
+  Widget _buildSetInputModeToggle() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.background,
@@ -167,17 +268,25 @@ class _ExerciseCardState extends State<ExerciseCard> {
             Expanded(
               child: _buildModeButton(
                 icon: LucideIcons.keyboard,
-                label: '표준 입력',
-                isSelected: _inputMode == InputMode.standard,
-                onTap: () => setState(() => _inputMode = InputMode.standard),
+                label: '디지털 입력',
+                isSelected: widget.exercise.setInputMode == SetInputMode.digital,
+                onTap: () {
+                  setState(() {
+                    widget.exercise.setInputMode = SetInputMode.digital;
+                  });
+                },
               ),
             ),
             Expanded(
               child: _buildModeButton(
                 icon: LucideIcons.penTool,
-                label: '필기 모드',
-                isSelected: _inputMode == InputMode.handwriting,
-                onTap: () => setState(() => _inputMode = InputMode.handwriting),
+                label: '필기 입력',
+                isSelected: widget.exercise.setInputMode == SetInputMode.handwriting,
+                onTap: () {
+                  setState(() {
+                    widget.exercise.setInputMode = SetInputMode.handwriting;
+                  });
+                },
               ),
             ),
           ],
@@ -224,56 +333,38 @@ class _ExerciseCardState extends State<ExerciseCard> {
     );
   }
 
-  Widget _buildStandardContent() {
+  /// 디지털 세트 입력 UI
+  Widget _buildDigitalSetInput() {
     return Column(
-      key: const ValueKey('standard'),
+      key: const ValueKey('digital_input'),
       children: [
-        // 운동 부위/종목 입력
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: _SimpleTextField(
-                  label: '운동 부위',
-                  hint: '등',
-                  onChanged: (v) => widget.exercise.targetPart = v,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 3,
-                child: _SimpleTextField(
-                  label: '운동 종목',
-                  hint: '랫 풀 다운',
-                  onChanged: (v) => widget.exercise.name = v,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // 사진 슬롯
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: const [
-              _PhotoSlot(),
-              SizedBox(width: 12),
-              _PhotoSlot(),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         // 세트 헤더
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              SizedBox(width: 32, child: Center(child: Text('SET', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
-              Expanded(child: Center(child: Text('kg', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
-              Expanded(child: Center(child: Text('회', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
-              Expanded(child: Center(child: Text('휴식', style: AppTextStyles.caption.copyWith(fontSize: 11)))),
+              SizedBox(
+                width: 32,
+                child: Center(
+                  child: Text('SET', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('kg', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('회', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('휴식', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                ),
+              ),
               const SizedBox(width: 32),
             ],
           ),
@@ -294,13 +385,21 @@ class _ExerciseCardState extends State<ExerciseCard> {
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.background))),
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: AppColors.background)),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(LucideIcons.plus, size: 14, color: AppColors.primary),
                 const SizedBox(width: 4),
-                Text('세트 추가', style: AppTextStyles.button.copyWith(color: AppColors.primary, fontSize: 13)),
+                Text(
+                  '세트 추가',
+                  style: AppTextStyles.button.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ),
           ),
@@ -309,9 +408,10 @@ class _ExerciseCardState extends State<ExerciseCard> {
     );
   }
 
-  Widget _buildHandwritingContent() {
+  /// 필기 세트 입력 UI (캔버스)
+  Widget _buildHandwritingSetInput() {
     return Padding(
-      key: const ValueKey('handwriting'),
+      key: const ValueKey('handwriting_input'),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -319,7 +419,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.5),
+              color: AppColors.primaryLight.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -328,7 +428,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '템플릿 위에 스타일러스 또는 손가락으로 기록하세요.',
+                    '템플릿 위에 스타일러스 또는 손가락으로 세트 정보를 기록하세요.',
                     style: TextStyle(fontSize: 12, color: AppColors.primary),
                   ),
                 ),
@@ -339,9 +439,10 @@ class _ExerciseCardState extends State<ExerciseCard> {
           // 필기 캔버스
           HandwritingInputContent(
             templateAssetPath: 'assets/images/templates/workout_template_v1.png',
+            initialImagePath: widget.exercise.handwritingImagePath,
             onSaved: (path) {
               setState(() {
-                _savedHandwritingPath = path;
+                widget.exercise.handwritingImagePath = path;
               });
               widget.onHandwritingSaved?.call(path);
             },
@@ -395,13 +496,20 @@ class SessionTextInput extends StatelessWidget {
 class _SimpleTextField extends StatelessWidget {
   final String label;
   final String hint;
+  final String? initialValue;
   final Function(String) onChanged;
 
-  const _SimpleTextField({required this.label, required this.hint, required this.onChanged});
+  const _SimpleTextField({
+    required this.label,
+    required this.hint,
+    this.initialValue,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: TextEditingController(text: initialValue),
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
@@ -409,7 +517,10 @@ class _SimpleTextField extends StatelessWidget {
         filled: true,
         fillColor: AppColors.background,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
@@ -441,7 +552,10 @@ class _SetRow extends StatelessWidget {
         onChanged: onChanged,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.disabled)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.disabled),
+          ),
         ),
       ),
     );
@@ -457,9 +571,21 @@ class _SetRow extends StatelessWidget {
             width: 32,
             child: Center(
               child: Container(
-                width: 24, height: 24,
-                decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                child: Center(child: Text('${index + 1}', style: AppTextStyles.button.copyWith(fontSize: 12, color: AppColors.primary))),
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: AppTextStyles.button.copyWith(
+                      fontSize: 12,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -508,13 +634,16 @@ class _PhotoSlot extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        width: 64, height: 64,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           color: AppColors.background,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.disabled),
         ),
-        child: const Center(child: Icon(LucideIcons.camera, color: AppColors.textLight, size: 20)),
+        child: const Center(
+          child: Icon(LucideIcons.camera, color: AppColors.textLight, size: 20),
+        ),
       ),
     );
   }

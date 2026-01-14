@@ -1,27 +1,53 @@
 // 운동일지 정보를 관리하는 WorkoutLog 데이터 모델을 정의합니다.
+
+/// 세트 데이터 입력 방식
+enum ExerciseInputType { digital, handwriting }
+
 class WorkoutExercise {
   final String id;
   final String name;
-  final List<WorkoutSet> sets;
+  final String targetPart;
+  final ExerciseInputType inputType;
+  final List<WorkoutSet>? sets; // null if handwriting mode
+  final String? handwritingImagePath; // null if digital mode
+  final List<String> photos;
   final String notes;
 
   WorkoutExercise({
     required this.id,
     required this.name,
-    required this.sets,
+    this.targetPart = '',
+    this.inputType = ExerciseInputType.digital,
+    this.sets,
+    this.handwritingImagePath,
+    this.photos = const [],
     required this.notes,
   });
+
+  /// 디지털 입력 모드인지 확인
+  bool get isDigitalInput => inputType == ExerciseInputType.digital;
+
+  /// 필기 입력 모드인지 확인
+  bool get isHandwritingInput => inputType == ExerciseInputType.handwriting;
 
   WorkoutExercise copyWith({
     String? id,
     String? name,
+    String? targetPart,
+    ExerciseInputType? inputType,
     List<WorkoutSet>? sets,
+    String? handwritingImagePath,
+    List<String>? photos,
     String? notes,
   }) {
     return WorkoutExercise(
       id: id ?? this.id,
       name: name ?? this.name,
+      targetPart: targetPart ?? this.targetPart,
+      inputType: inputType ?? this.inputType,
       sets: sets ?? this.sets,
+      handwritingImagePath: handwritingImagePath ?? this.handwritingImagePath,
+      photos: photos ?? this.photos,
       notes: notes ?? this.notes,
     );
   }
@@ -30,7 +56,11 @@ class WorkoutExercise {
     return {
       'id': id,
       'name': name,
-      'sets': sets.map((set) => set.toJson()).toList(),
+      'targetPart': targetPart,
+      'inputType': inputType.name,
+      'sets': sets?.map((set) => set.toJson()).toList(),
+      'handwritingImagePath': handwritingImagePath,
+      'photos': photos,
       'notes': notes,
     };
   }
@@ -39,7 +69,16 @@ class WorkoutExercise {
     return WorkoutExercise(
       id: json['id'],
       name: json['name'],
-      sets: (json['sets'] as List).map((set) => WorkoutSet.fromJson(set)).toList(),
+      targetPart: json['targetPart'] ?? '',
+      inputType: ExerciseInputType.values.firstWhere(
+        (e) => e.name == json['inputType'],
+        orElse: () => ExerciseInputType.digital,
+      ),
+      sets: json['sets'] != null
+          ? (json['sets'] as List).map((set) => WorkoutSet.fromJson(set)).toList()
+          : null,
+      handwritingImagePath: json['handwritingImagePath'],
+      photos: json['photos'] != null ? List<String>.from(json['photos']) : [],
       notes: json['notes'],
     );
   }

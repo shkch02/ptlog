@@ -1,6 +1,7 @@
 // 작성된 운동일지의 상세 내용을 보여주는 화면입니다.
 // lib/screens/workout_log_detail_screen.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';
@@ -119,37 +120,83 @@ class WorkoutLogDetailScreen extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          // 세트 정보 테이블
+          // 세트 정보 테이블 또는 필기 이미지
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Row(
-                  children: const [
-                    Expanded(child: Center(child: Text('SET', style: TextStyle(color: Colors.grey, fontSize: 12)))),
-                    Expanded(child: Center(child: Text('kg', style: TextStyle(color: Colors.grey, fontSize: 12)))),
-                    Expanded(child: Center(child: Text('Reps', style: TextStyle(color: Colors.grey, fontSize: 12)))),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...exercise.sets.map((set) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                              child: Center(
-                                  child: Text('${set.setNumber}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)))),
-                          Expanded(child: Center(child: Text('${set.weight}'))),
-                          Expanded(child: Center(child: Text('${set.reps}'))),
-                        ],
-                      ),
-                    )),
-              ],
-            ),
+            child: exercise.isHandwritingInput && exercise.handwritingImagePath != null
+                ? _buildHandwritingImage(exercise.handwritingImagePath!)
+                : _buildSetsTable(exercise.sets ?? []),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSetsTable(List<WorkoutSet> sets) {
+    if (sets.isEmpty) {
+      return const Center(
+        child: Text('세트 정보가 없습니다.', style: TextStyle(color: Colors.grey)),
+      );
+    }
+    return Column(
+      children: [
+        Row(
+          children: const [
+            Expanded(child: Center(child: Text('SET', style: TextStyle(color: Colors.grey, fontSize: 12)))),
+            Expanded(child: Center(child: Text('kg', style: TextStyle(color: Colors.grey, fontSize: 12)))),
+            Expanded(child: Center(child: Text('Reps', style: TextStyle(color: Colors.grey, fontSize: 12)))),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...sets.map((set) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Center(
+                          child: Text('${set.setNumber}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)))),
+                  Expanded(child: Center(child: Text('${set.weight}'))),
+                  Expanded(child: Center(child: Text('${set.reps}'))),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildHandwritingImage(String imagePath) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(LucideIcons.penTool, size: 14, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
+            Text('필기 기록', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            File(imagePath),
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text('이미지를 불러올 수 없습니다.', style: TextStyle(color: Colors.grey)),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
