@@ -1,6 +1,7 @@
 // 필기 모드 입력 위젯
 // lib/widgets/session_log/handwriting_input_content.dart
 
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,9 @@ class _HandwritingInputContentState extends State<HandwritingInputContent> {
   DrawingTool _currentTool = DrawingTool.pen;
   Color _currentColor = Colors.black;
   double _currentStrokeWidth = 3.0;
+
+  // 템플릿 이미지의 실제 비율
+  double _templateAspectRatio = 4 / 3;
 
   @override
   void initState() {
@@ -74,14 +78,31 @@ class _HandwritingInputContentState extends State<HandwritingInputContent> {
 
   Future<void> _loadBackgroundImage() async {
     try {
-      // 에셋에서 이미지 로드
-      final ByteData data = await rootBundle.load(widget.templateAssetPath);
-      final Uint8List bytes = data.buffer.asUint8List();
+      Uint8List bytes;
+
+      // 기존 저장된 이미지가 있으면 해당 이미지 로드, 없으면 템플릿 로드
+      if (widget.initialImagePath != null) {
+        final file = File(widget.initialImagePath!);
+        if (await file.exists()) {
+          bytes = await file.readAsBytes();
+        } else {
+          // 파일이 없으면 템플릿 로드
+          final ByteData data = await rootBundle.load(widget.templateAssetPath);
+          bytes = data.buffer.asUint8List();
+        }
+      } else {
+        // 에셋에서 템플릿 이미지 로드
+        final ByteData data = await rootBundle.load(widget.templateAssetPath);
+        bytes = data.buffer.asUint8List();
+      }
 
       // 이미지 디코딩
       final ui.Codec codec = await ui.instantiateImageCodec(bytes);
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       final ui.Image image = frameInfo.image;
+
+      // 템플릿 이미지의 실제 비율 계산
+      _templateAspectRatio = image.width / image.height;
 
       // 배경으로 설정
       _controller?.background = image.backgroundDrawable;
@@ -149,8 +170,15 @@ class _HandwritingInputContentState extends State<HandwritingInputContent> {
         ),
       );
 
+      // 템플릿 비율에 맞는 렌더링 사이즈 계산 (가로 기준 1200px)
+      const double baseWidth = 1200;
+      final Size renderSize = Size(baseWidth, baseWidth / _templateAspectRatio);
+
       // 이미지 렌더링 및 저장
-      final savedPath = await HandwritingService.saveDrawing(_controller!);
+      final savedPath = await HandwritingService.saveDrawing(
+        _controller!,
+        size: renderSize,
+      );
 
       // 다이얼로그 닫기
       if (mounted) Navigator.of(context).pop();
@@ -244,7 +272,7 @@ class _HandwritingInputContentState extends State<HandwritingInputContent> {
 
   Widget _buildCanvas() {
     return AspectRatio(
-      aspectRatio: 4 / 3,
+      aspectRatio: _templateAspectRatio,
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.disabled, width: 2),
