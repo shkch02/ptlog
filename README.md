@@ -1,285 +1,109 @@
 # PTLog - 피트니스 트레이너를 위한 회원 관리 앱
 
-PTLog는 피트니스 트레이너가 회원을 효율적으로 관리하고, 수업 스케줄을 계획하며, 운동 일지를 기록할 수 있도록 돕는 크로스 플랫폼 애플리케이션입니다.
+PTLog는 피트니스 트레이너가 회원을 효율적으로 관리하고, 수업 스케줄을 계획하며, 운동 일지를 기록할 수 있도록 돕는 크로스 플랫폼 애플리케이션입니다. Flutter와 Riverpod를 기반으로 구축되어 반응형 UI와 확장 가능한 아키텍처를 제공합니다.
 
-## 주요 기능
+## 주요 기능 (현재 구현 기준)
 
-- **회원 관리**: 신규 회원 등록, 정보 수정, 검색 및 보관/삭제 기능을 제공합니다.
-  - 신체 정보 관리 (키, 체중, 체지방률, 골격근량 등)
-  - 목표 설정 (목표 체중, 목표 골격근량)
-  - 활동량 및 수면 시간 기록
-- **스케줄 관리**: 트레이너별/일자별 수업 스케줄을 한눈에 파악하고 관리할 수 있습니다.
-  - 수업 시간 충돌 감지
-  - 알림 설정
-- **운동 일지**: 수업별 운동 내용, 세트, 피드백 등을 상세히 기록하고 조회할 수 있습니다.
-  - **디지털 입력**: 무게, 횟수, 휴식 시간을 숫자로 입력
-  - **필기 입력**: 태블릿/터치스크린에서 손글씨로 직접 기록 (기본 모드)
-  - 운동별 사진 첨부 기능
-- **대시보드**: 오늘 예정된 수업, 만료 임박 회원 등 주요 정보를 빠르게 확인할 수 있습니다.
-- **결제 관리**: PT 결제 및 세션 등록 이력을 추적합니다.
+-   **대시보드 (`HomeScreen`):**
+    -   오늘 예정된 수업 목록을 시간순으로 표시합니다.
+    -   예약된 수업이 없을 경우, 수동으로 세션을 시작할 수 있는 UI를 제공합니다.
+    -   각 수업 카드를 통해 회원 상세 정보 조회 또는 운동 일지 작성을 시작할 수 있습니다.
+
+-   **회원 관리 (`MemberListScreen`):**
+    -   트레이너에게 등록된 모든 활성 회원을 목록 형태로 보여줍니다.
+    -   이름, 전화번호로 회원을 실시간 검색할 수 있습니다.
+    -   **신규 회원 등록:** 다이얼로그를 통해 새 회원의 기본 정보를 추가하고, 현재 트레이너와 자동으로 연결합니다.
+    -   **회원 상세 정보:** 탭(Tab) 기반 UI로 회원의 PT 세션 이력, 기본 정보, 상세 메모, 설정을 관리합니다.
+        -   **PT 세션:** 과거 및 예정된 모든 수업 이력을 조회하고, 지난 수업의 운동 기록을 확인할 수 있습니다.
+        -   **기본 정보:** 인적사항과 키, 체중 등 상세한 신체 정보를 조회하고 수정합니다.
+        -   **상세 메모:** 회원 관련 특이사항 (부상 이력, 목표 등)을 자유롭게 기록하고 저장합니다.
+        -   **설정:** 회원을 '보관' 상태로 변경하거나 시스템에서 영구 '삭제'할 수 있습니다.
+    -   **보관된 회원 관리:** 별도 다이얼로그에서 보관된 회원 목록을 확인하고 다시 '복원'할 수 있습니다.
+
+-   **스케줄 관리 (`ScheduleViewScreen`):**
+    -   주간(Weekly) 타임테이블 형식으로 트레이너의 모든 스케줄을 시각적으로 보여줍니다.
+    -   상단의 월간 캘린더를 통해 특정 날짜가 포함된 주로 빠르게 이동할 수 있습니다.
+    -   시간표의 빈 슬롯을 탭하여 새 세션을 추가하거나, 기존 세션을 탭하여 정보를 수정/삭제할 수 있습니다. (UI 구현 완료, 기능 연동 필요)
+
+-   **운동 일지 작성 (`SessionLogScreen`):**
+    -   수업 정보를 바탕으로 운동 일지를 작성합니다.
+    -   **디지털 입력:** 운동 종목, 부위, 세트(무게, 횟수, 휴식)를 키보드로 직접 입력합니다.
+    -   **필기 입력:** 템플릿 이미지 위에서 손글씨로 자유롭게 기록할 수 있습니다. (웹: Base64, 모바일: 파일로 저장)
+    -   운동별로 사진을 첨부할 수 있습니다. (UI 구현 완료, 기능 연동 필요)
+    -   수업에 대한 총평(피드백)과 다음 세션을 위한 메모를 남길 수 있습니다.
 
 ## 기술 스택
 
-- **프레임워크**: Flutter (Dart SDK ^3.3.4)
-- **상태 관리**: Riverpod
-- **UI**: Material Design 3
-- **아이콘**: Lucide Icons
-- **캘린더**: Table Calendar
-- **필기 입력**: Flutter Painter v2
-- **이미지 처리**: Image Picker
-- **날짜 포맷팅**: intl (한국어 지원)
+-   **프레임워크**: Flutter (Dart)
+-   **상태 관리**: Flutter Riverpod
+-   **아키텍처**: Repository Pattern, Service Layer
+-   **UI**: Material Design 3
+-   **주요 라이브러리**:
+    -   `table_calendar`: 월간/주간 캘린더 UI
+    -   `flutter_painter_v2`: 필기 입력 기능
+    -   `lucide_icons`: 아이콘 시스템
+    -   `intl`: 날짜 및 시간 포맷팅 (한국어 지원)
 
-## 지원 플랫폼
+## 백엔드 구현 가이드 (API 설계 제안)
 
-- Android
-- iOS
-- Web
-- Windows
-- macOS
-- Linux
-
----
-
-## 벡엔드 구현 가이드
-
-이 문서는 프론트엔드 코드 분석을 통해 백엔드 API를 설계하고 구현하는 데 필요한 정보를 제공합니다.
+이 프로젝트는 현재 Mock 데이터를 사용하고 있습니다. 실제 백엔드 연동을 위해 다음과 같은 데이터 모델과 API 엔드포인트를 설계할 수 있습니다.
 
 ### 1. 데이터 모델 구조
 
-애플리케이션에서 사용하는 핵심 데이터 모델은 다음과 같습니다. JSON 직렬화/역직렬화를 위한 `toJson`/`fromJson` 메서드가 각 모델에 포함되어 있습니다.
+-   **`Member`**: 회원의 고유 정보 (이름, 연락처, 신체 정보 등)
+-   **`User`**: 사용자(트레이너) 정보
+-   **`TrainerMemberRelation`**: 트레이너와 회원 간의 '계약' 관계를 정의하는 중간 테이블. 한 명의 회원은 여러 트레이너와 관계를 맺을 수 있습니다.
+-   **`Schedule`**: 특정 `TrainerMemberRelation`에 종속되는 수업 스케줄.
+-   **`WorkoutLog`**: 완료된 `Schedule`에 대한 상세 운동 기록.
+-   **`PaymentLog`**: `TrainerMemberRelation`에 대한 결제 이력.
 
-#### `Member`
+### 2. Repository 기반 API 엔드포인트 설계
 
-회원의 기본 정보 및 신체 정보를 관리합니다.
+프론트엔드의 Repository 클래스는 백엔드 API와 1:1로 매칭될 수 있습니다.
 
--   `id`: `String` (PK)
--   `name`: `String`
--   `phone`: `String`
--   `email`: `String`
--   `remainingSessions`: `int` (남은 세션 횟수)
--   `totalSessions`: `int` (총 등록 횟수)
--   `registrationDate`: `DateTime`
--   `notes`: `String` (특이사항, 메모)
--   `profileImage`: `String?` (프로필 이미지 URL)
--   `isArchived`: `bool` (보관(비활성) 여부, 기본값 `false`)
--   **신체 정보 (nullable)**:
-    -   `height`: `double?`
-    -   `weight`: `double?`
-    -   `targetWeight`: `double?`
-    -   `age`: `int?`
-    -   `bodyFat`: `double?`
-    -   `skeletalMuscle`: `double?`
-    -   `targetMuscle`: `double?`
-    -   `activityLevel`: `String?`
-    -   `sleepTime`: `String?`
-
-#### `TrainerMemberRelation`
-
-트레이너와 회원 간의 '계약' 또는 '소속' 관계를 정의합니다. 한 명의 회원은 여러 트레이너와 관계를 맺을 수 있습니다.
-
--   `id`: `String` (PK)
--   `trainerId`: `String` (FK, User/Trainer 모델 참조)
--   `memberId`: `String` (FK, Member 모델 참조)
--   `startDate`: `DateTime` (관계 시작일)
--   `endDate`: `DateTime?` (관계 종료일)
--   `isActive`: `bool` (현재 유효한 관계인지 여부)
--   `memberName`: `String?` (JOIN된 데이터, 편의용)
--   `trainerName`: `String?` (JOIN된 데이터, 편의용)
-
-#### `Schedule`
-
-수업 스케줄 정보를 관리합니다. 특정 `TrainerMemberRelation`에 종속됩니다.
-
--   `id`: `String` (PK)
--   `relationId`: `String` (FK, TrainerMemberRelation 모델 참조)
--   `memberId`: `String?` (JOIN된 데이터, 편의용)
--   `memberName`: `String?` (JOIN된 데이터, 편의용)
--   `date`: `DateTime` (수업 날짜)
--   `startTime`: `String` (예: "09:00")
--   `endTime`: `String` (예: "09:50")
--   `notes`: `String` (수업 관련 메모)
--   `reminder`: `String` (알림 설정)
-
-#### `WorkoutLog`
-
-수업 완료 후 작성하는 운동 일지입니다.
-
--   `id`: `String` (PK)
--   `memberId`: `String` (FK, Member 모델 참조)
--   `memberName`: `String`
--   `date`: `DateTime`
--   `sessionNumber`: `int` (몇 회차 수업인지)
--   `exercises`: `List<WorkoutExercise>` (운동 목록)
--   `overallNotes`: `String` (총평, 피드백)
--   `reminderForNext`: `String` (다음 수업을 위한 메모)
--   `photos`: `List<String>` (사진 URL 목록)
-
-#### `WorkoutExercise` / `WorkoutSet`
-
-`WorkoutLog`에 포함되는 상세 운동 및 세트 정보입니다.
-
-- **WorkoutExercise**:
-  - `id`: `String` (PK)
-  - `name`: `String` (운동 이름)
-  - `targetPart`: `String` (운동 부위)
-  - `inputType`: `ExerciseInputType` (입력 방식: `digital` 또는 `handwriting`)
-  - `sets`: `List<WorkoutSet>?` (디지털 입력 시 세트 목록)
-  - `handwritingImagePath`: `String?` (필기 입력 시 이미지 경로/Data URI)
-  - `photos`: `List<String>` (운동 사진 URL 목록)
-  - `notes`: `String` (메모)
-- **WorkoutSet**: `setNumber`, `reps`, `weight`
-
-#### `PaymentLog`
-
-결제 및 세션 등록 이력을 관리합니다.
-
-- `id`: `String` (PK)
-- `relationId`: `String` (FK, TrainerMemberRelation 모델 참조)
-- `date`: `DateTime` (결제일/등록일)
-- `type`: `String` (유형: 'PT결제', '회원권', 'CRM연동' 등)
-- `content`: `String` (내용: '10회 등록', '성공' 등)
-- `amount`: `String` (금액)
-
-### 2. Repository API (엔드포인트 설계 참고)
-
-프론트엔드의 Repository 클래스들은 백엔드 API 엔드포인트와 1:1로 매칭될 수 있습니다.
-
-#### `AuthRepository`
-
--   `login(email, password)`: `POST /api/auth/login`
-    -   로그인 성공 시 사용자 정보 및 토큰 반환.
-
-#### `RelationRepository`
-
--   `getActiveRelationsForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/relations?active=true`
-    -   특정 트레이너에게 소속된 모든 활성 계약 목록을 반환합니다.
--   `createRelation(trainerId, memberId)`: `POST /api/relations`
-    -   Body: `{ "trainerId": "...", "memberId": "..." }`
-    -   새로운 트레이너-회원 관계를 생성합니다.
--   `deactivateRelation(relationId)`: `PATCH /api/relations/{relationId}/deactivate`
-    -   특정 관계를 비활성화(계약 종료) 처리합니다.
-
-#### `MemberRepository`
-
--   `getMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members`
-    -   `RelationRepository`를 통해 해당 트레이ナー와 연결된 활성 회원 목록을 조회합니다.
--   `getArchivedMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members?archived=true`
-    -   보관된 회원 목록을 조회합니다.
--   `getRenewalNeededMembersForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/members?renewal=true`
-    -   남은 세션 횟수가 적은(예: 3회 이하) 회원 목록을 반환합니다.
--   `addMember(member)`: `POST /api/members`
-    -   신규 회원을 시스템에 등록합니다.
--   `updateMemberNotes(memberId, newNotes)`: `PATCH /api/members/{memberId}/notes`
-    -   Body: `{ "notes": "..." }`
--   `archiveMember(memberId)`: `PATCH /api/members/{memberId}/archive`
-    -   회원을 보관 상태로 변경합니다.
--   `unarchiveMember(memberId)`: `PATCH /api/members/{memberId}/unarchive`
-    -   회원을 다시 활성 상태로 복원합니다.
--   `deleteMember(memberId)`: `DELETE /api/members/{memberId}`
-    -   회원 정보를 영구 삭제합니다.
-
-#### `ScheduleRepository`
-
--   `getSchedulesForTrainerByDate(trainerId, dateStr)`: `GET /api/trainers/{trainerId}/schedules?date={dateStr}`
-    -   특정 트레이너의 특정 날짜 스케줄 목록을 반환합니다.
--   `getUpcomingSchedulesForTrainer(trainerId)`: `GET /api/trainers/{trainerId}/schedules/upcoming`
-    -   오늘 예정된 수업 중 가장 가까운 수업 1개를 반환합니다.
--   `getSchedulesByMember(memberId)`: `GET /api/members/{memberId}/schedules`
-    -   특정 회원의 전체 수업 이력을 반환합니다.
--   `checkConflictForTrainer(...)`: `GET /api/trainers/{trainerId}/schedules/check-conflict?date=...&startTime=...&endTime=...`
-    -   새로운 스케줄 등록 시 중복 여부를 확인합니다.
--   `addSchedule(schedule)`: `POST /api/schedules`
-    -   새로운 수업 스케줄을 추가합니다.
-
-#### `WorkoutLogRepository`
-
--   `getLogBySchedule(memberId, date)`: `GET /api/logs?memberId={memberId}&date={date}`
-    -   특정 회원의 특정 날짜 운동 일지를 조회합니다.
+-   **`AuthRepository`**
+    -   `login(email, password)` → `POST /api/auth/login`
+-   **`RelationRepository`**
+    -   `getActiveRelationsForTrainer(trainerId)` → `GET /api/trainers/{trainerId}/relations?active=true`
+    -   `createRelation(trainerId, memberId)` → `POST /api/relations`
+-   **`MemberRepository`**
+    -   `getMembersForTrainer(trainerId)` → `GET /api/trainers/{trainerId}/members`
+    -   `addMember(member)` → `POST /api/members`
+    -   `archiveMember(memberId)` → `PATCH /api/members/{memberId}/archive`
+-   **`ScheduleRepository`**
+    -   `getSchedulesForTrainerByDate(trainerId, date)` → `GET /api/trainers/{trainerId}/schedules?date={date}`
+    -   `addSchedule(schedule)` → `POST /api/schedules`
+-   **`WorkoutLogRepository`**
+    -   `getLogBySchedule(memberId, date)` → `GET /api/logs?memberId={memberId}&date={date}`
+    -   `createLog(log)` → `POST /api/logs`
 
 ## 프로젝트 구조
 
 ```
 lib/
 ├── main.dart                 # 앱 진입점
-├── constants/                # 상수 정의
-│   ├── app_colors.dart       # 색상 정의
-│   ├── app_dimensions.dart   # 크기 정의
-│   ├── app_strings.dart      # 문자열 정의
-│   └── app_text_styles.dart  # 텍스트 스타일
-├── models/                   # 데이터 모델
-│   ├── member.dart           # 회원 모델
-│   ├── schedule.dart         # 스케줄 모델
-│   ├── workout_log.dart      # 운동 일지 모델
-│   ├── payment_log.dart      # 결제 로그 모델
-│   ├── trainer_member_relation.dart  # 관계 모델
-│   ├── session_form.dart     # 세션 폼 모델
-│   └── user.dart             # 사용자(트레이너) 모델
-├── providers/                # Riverpod 프로바이더
-│   ├── auth_providers.dart   # 인증 상태
-│   ├── home_providers.dart   # 홈 화면 상태
-│   ├── schedule_providers.dart   # 스케줄 상태
-│   └── repository_providers.dart # 레포지토리 프로바이더
-├── repositories/             # 데이터 접근 레이어
-│   ├── auth_repository.dart
-│   ├── member_repository.dart
-│   ├── relation_repository.dart
-│   ├── schedule_repository.dart
-│   └── workout_log_repository.dart
-├── screens/                  # 화면
-│   ├── login_screen.dart     # 로그인
-│   ├── layout_screen.dart    # 레이아웃
-│   ├── home_screen.dart      # 홈 대시보드
-│   ├── member_list_screen.dart   # 회원 목록
-│   ├── schedule_view_screen.dart # 스케줄 조회
-│   ├── session_log_screen.dart   # 세션 로그 작성
-│   └── workout_log_detail_screen.dart  # 운동 일지 상세
-├── services/                 # 비즈니스 로직 서비스
-│   ├── handwriting_service.dart      # 필기 입력 서비스
-│   ├── handwriting_service_io.dart   # 모바일용 구현
-│   └── handwriting_service_web.dart  # 웹용 구현
-├── widgets/                  # 재사용 위젯
-│   ├── home_widgets.dart
-│   ├── member_add_dialog.dart
-│   ├── member_detail_dialog.dart
-│   ├── schedule_dialogs.dart
-│   ├── session_log_widgets.dart
-│   └── member_detail_tabs/   # 회원 상세 탭 위젯
-│       ├── basic_info_tab.dart
-│       ├── detailed_memo_tab.dart
-│       ├── payment_tab.dart
-│       ├── pt_sessions_tab.dart
-│       └── settings_tab.dart
-└── data/
-    └── mock_data.dart        # 목업 데이터
+├── constants/                # 앱 전역 상수 (색상, 스타일, 문자열 등)
+├── data/
+│   └── mock_data.dart        # 현재 사용 중인 목업 데이터
+├── models/                   # 데이터 모델 (Member, Schedule 등)
+├── providers/                # Riverpod 프로바이더 (상태 관리)
+├── repositories/             # 데이터 접근 레이어 (API 통신 추상화)
+├── screens/                  # 주요 화면 (로그인, 홈, 회원 목록 등)
+├── services/                 # 비즈니스 로직 서비스 (HandwritingService 등)
+└── widgets/                  # 재사용 가능한 UI 컴포넌트
+    ├── member_detail_tabs/   # 회원 상세 정보의 탭 위젯
+    └── session_log/          # 세션 로그 관련 위젯
 ```
 
-## 프로젝트 실행 방법
+## 실행 방법
 
-1. Flutter SDK 설치 (^3.3.4 이상)
-2. 프로젝트 의존성 설치:
-   ```bash
-   flutter pub get
-   ```
-3. 앱 실행:
-   ```bash
-   # 기본 실행 (연결된 디바이스/에뮬레이터)
-   flutter run
-
-   # 웹으로 실행
-   flutter run -d chrome
-
-   # 특정 플랫폼 빌드
-   flutter build apk      # Android
-   flutter build ios      # iOS
-   flutter build web      # Web
-   flutter build windows  # Windows
-   ```
-
-## 필기 입력 기능
-
-운동 일지 작성 시 세트 정보를 입력하는 두 가지 모드를 지원합니다:
-
-- **디지털 입력**: 무게(kg), 횟수(reps)를 숫자로 직접 입력
-- **필기 입력 (기본값)**: 터치스크린/태블릿에서 손글씨로 자유롭게 기록
-  - 웹: Base64 Data URI로 저장
-  - 모바일: 로컬 파일로 저장
+1.  **Flutter SDK 설치**
+2.  **의존성 설치:**
+    ```bash
+    flutter pub get
+    ```
+3.  **앱 실행:**
+    ```bash
+    flutter run
+    ```
+    또는 VS Code, Android Studio에서 `F5` 키를 눌러 디버그 모드로 실행할 수 있습니다.
