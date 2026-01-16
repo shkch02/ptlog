@@ -67,3 +67,20 @@ When approaching a new task, please follow this general workflow:
 2.  **Plan**: Briefly outline the changes. Determine if a new widget, provider, or repository method is needed. Consider the impact on existing code.
 3.  **Implement**: Write the code, adhering to the established architecture and development standards. Prefer creating reusable widgets and leveraging existing providers.
 4.  **Verify**: After implementation, run `flutter analyze` and any relevant tests to ensure the changes are correct and do not introduce new issues.
+
+## Change Log
+
+### 2026-01-16
+
+● Refactoring complete. Here's a summary of the changes:
+
+  Files Modified:
+
+  1. lib/widgets/session_log_widgets.dart
+    - Added import: import 'package:ptlog/constants/app_assets.dart';
+    - Replaced 2 occurrences of hardcoded path with AppAssets.workoutTemplateV1
+  2. lib/widgets/session_log/handwriting_input_content.dart
+    - Added import: import 'package:ptlog/constants/app_assets.dart';
+    - Replaced 1 occurrence (default parameter) with AppAssets.workoutTemplateV1
+
+  Verification: flutter analyze passed with no issues.

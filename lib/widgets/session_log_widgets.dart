@@ -1,11 +1,15 @@
 // 세션 로그에 사용되는 위젯 모음
 // lib/widgets/session_log_widgets.dart
 
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ptlog/constants/app_assets.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
+import 'package:ptlog/services/handwriting_service.dart';
 import 'package:ptlog/widgets/session_log/handwriting_input_content.dart';
 import '../models/index.dart';
 
@@ -107,10 +111,13 @@ class _ExerciseCardState extends State<ExerciseCard> {
           // ========== 1. 헤더 영역 ==========
           _buildHeader(),
 
-          // ========== 2. 세트 입력 모드 토글 ==========
+          // ========== 2. 사진 섹션 (항상 표시) ==========
+          _buildPhotoSection(),
+
+          // ========== 3. 세트 입력 모드 토글 ==========
           _buildSetInputModeToggle(),
 
-          // ========== 3. 세트 입력 영역 (모드에 따라 변경) ==========
+          // ========== 4. 세트 입력 영역 (모드에 따라 변경) ==========
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) {
@@ -171,6 +178,39 @@ class _ExerciseCardState extends State<ExerciseCard> {
               onPressed: widget.onRemove,
               visualDensity: VisualDensity.compact,
             ),
+        ],
+      ),
+    );
+  }
+
+  /// 사진 섹션: 운동 사진 첨부 슬롯 (항상 표시)
+  Widget _buildPhotoSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.camera, size: 14, color: AppColors.textLight),
+              const SizedBox(width: 6),
+              Text(
+                '운동 사진',
+                style: AppTextStyles.caption.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textLight,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: const [
+              _PhotoSlot(),
+              SizedBox(width: 12),
+              _PhotoSlot(),
+            ],
+          ),
         ],
       ),
     );
@@ -289,44 +329,29 @@ class _ExerciseCardState extends State<ExerciseCard> {
       key: const ValueKey('digital_input'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ========== 공통 정보 섹션 (운동 부위, 종목, 사진) ==========
+        // ========== 운동 정보 섹션 (운동 부위, 종목) ==========
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              // 운동 부위 / 종목 입력
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: _SimpleTextField(
-                      label: '운동 부위',
-                      hint: '등',
-                      initialValue: widget.exercise.targetPart,
-                      onChanged: (v) => widget.exercise.targetPart = v,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 3,
-                    child: _SimpleTextField(
-                      label: '운동 종목',
-                      hint: '랫 풀 다운',
-                      initialValue: widget.exercise.name,
-                      onChanged: (v) => widget.exercise.name = v,
-                    ),
-                  ),
-                ],
+              Expanded(
+                flex: 2,
+                child: _SimpleTextField(
+                  label: '운동 부위',
+                  hint: '등',
+                  initialValue: widget.exercise.targetPart,
+                  onChanged: (v) => widget.exercise.targetPart = v,
+                ),
               ),
-              const SizedBox(height: 12),
-              // 사진 슬롯
-              Row(
-                children: const [
-                  _PhotoSlot(),
-                  SizedBox(width: 12),
-                  _PhotoSlot(),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: _SimpleTextField(
+                  label: '운동 종목',
+                  hint: '랫 풀 다운',
+                  initialValue: widget.exercise.name,
+                  onChanged: (v) => widget.exercise.name = v,
+                ),
               ),
             ],
           ),
@@ -403,7 +428,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
     );
   }
 
-  /// 필기 세트 입력 UI (캔버스)
+  /// 필기 세트 입력 UI (미리보기 + 팝업 다이얼로그)
   Widget _buildHandwritingSetInput() {
     return Padding(
       key: const ValueKey('handwriting_input'),
@@ -423,7 +448,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '템플릿 위에 스타일러스 또는 손가락으로 세트 정보를 기록하세요.',
+                    '아래 이미지를 탭하면 전체 화면에서 필기할 수 있습니다.',
                     style: TextStyle(fontSize: 12, color: AppColors.primary),
                   ),
                 ),
@@ -431,19 +456,274 @@ class _ExerciseCardState extends State<ExerciseCard> {
             ),
           ),
           const SizedBox(height: 16),
-          // 필기 캔버스
-          HandwritingInputContent(
-            templateAssetPath: 'assets/images/templates/workout_template_v1.png',
-            initialImagePath: widget.exercise.handwritingImagePath,
-            onSaved: (path) {
-              setState(() {
-                widget.exercise.handwritingImagePath = path;
-              });
-              widget.onHandwritingSaved?.call(path);
-            },
-          ),
+          // 미리보기 이미지 (탭하면 다이얼로그 열림)
+          _buildHandwritingPreview(),
         ],
       ),
+    );
+  }
+
+  /// 필기 미리보기 이미지 위젯
+  Widget _buildHandwritingPreview() {
+    final imagePath = widget.exercise.handwritingImagePath;
+
+    return GestureDetector(
+      onTap: _showHandwritingDialog,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.disabled, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            children: [
+              // 이미지 (저장된 필기 또는 기본 템플릿)
+              AspectRatio(
+                aspectRatio: AppAssets.workoutTemplateAspectRatio,
+                child: imagePath != null
+                    ? _buildSavedImage(imagePath)
+                    : Image.asset(
+                        AppAssets.workoutTemplateV1,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              // "탭하여 편집" 오버레이
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.3),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            LucideIcons.penTool,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            imagePath != null ? '탭하여 편집' : '탭하여 필기 시작',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 저장된 필기 이미지 로드 위젯
+  Widget _buildSavedImage(String imagePath) {
+    // Data URI인 경우 (웹)
+    if (imagePath.startsWith('data:image/png;base64,')) {
+      final base64String = imagePath.split(',').last;
+      final bytes = base64Decode(base64String);
+      return Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildImageError();
+        },
+      );
+    }
+
+    // 파일 경로인 경우 (모바일) - FutureBuilder로 로드
+    return FutureBuilder<Uint8List?>(
+      future: HandwritingService.loadDrawing(imagePath),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: AppColors.background,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError || snapshot.data == null) {
+          return _buildImageError();
+        }
+        return Image.memory(
+          snapshot.data!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildImageError();
+          },
+        );
+      },
+    );
+  }
+
+  /// 이미지 로드 에러 위젯
+  Widget _buildImageError() {
+    return Container(
+      color: AppColors.background,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.imageOff, size: 32, color: AppColors.textLight),
+            const SizedBox(height: 8),
+            Text(
+              '이미지 로드 실패',
+              style: TextStyle(fontSize: 12, color: AppColors.textLight),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 필기 입력 다이얼로그 표시
+  void _showHandwritingDialog() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '필기 입력 닫기',
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return SafeArea(
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.95,
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 다이얼로그 헤더
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(LucideIcons.penTool, size: 20, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(
+                                '운동 ${widget.index + 1} - 필기 입력',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(LucideIcons.x, size: 20, color: Colors.white),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // 필기 캔버스
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: HandwritingInputContent(
+                          templateAssetPath: AppAssets.workoutTemplateV1,
+                          initialImagePath: widget.exercise.handwritingImagePath,
+                          onSaved: (path) {
+                            setState(() {
+                              widget.exercise.handwritingImagePath = path;
+                            });
+                            widget.onHandwritingSaved?.call(path);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutBack,
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

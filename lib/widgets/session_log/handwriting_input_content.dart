@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_painter_v2/flutter_painter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ptlog/constants/app_assets.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'package:ptlog/constants/app_text_styles.dart';
 import 'package:ptlog/services/handwriting_service.dart';
@@ -17,7 +18,7 @@ class HandwritingInputContent extends StatefulWidget {
 
   const HandwritingInputContent({
     super.key,
-    this.templateAssetPath = 'assets/images/templates/workout_template_v1.png',
+    this.templateAssetPath = AppAssets.workoutTemplateV1,
     this.onSaved,
     this.initialImagePath,
   });
