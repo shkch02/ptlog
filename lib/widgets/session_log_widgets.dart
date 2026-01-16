@@ -57,9 +57,10 @@ class SessionLogHeader extends StatelessWidget {
 ///
 /// 구조:
 /// - 헤더 (운동 번호, 삭제 버튼)
-/// - 공통 정보 섹션 (운동명, 부위, 사진) - 항상 표시
 /// - 세트 입력 모드 토글 (디지털/필기)
 /// - 세트 입력 영역 (모드에 따라 변경)
+///   - 디지털: 공통 정보 섹션 (운동명, 부위, 사진) + 세트 입력
+///   - 필기: 캔버스만 표시
 class ExerciseCard extends StatefulWidget {
   final int index;
   final ExerciseForm exercise;
@@ -106,16 +107,10 @@ class _ExerciseCardState extends State<ExerciseCard> {
           // ========== 1. 헤더 영역 ==========
           _buildHeader(),
 
-          // ========== 2. 공통 정보 섹션 (항상 표시) ==========
-          _buildCommonInfoSection(),
-
-          // ========== 3. 구분선 + 세트 기록 라벨 ==========
-          _buildSetSectionDivider(),
-
-          // ========== 4. 세트 입력 모드 토글 ==========
+          // ========== 2. 세트 입력 모드 토글 ==========
           _buildSetInputModeToggle(),
 
-          // ========== 5. 세트 입력 영역 (모드에 따라 변경) ==========
+          // ========== 3. 세트 입력 영역 (모드에 따라 변경) ==========
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) {
@@ -176,51 +171,6 @@ class _ExerciseCardState extends State<ExerciseCard> {
               onPressed: widget.onRemove,
               visualDensity: VisualDensity.compact,
             ),
-        ],
-      ),
-    );
-  }
-
-  /// 공통 정보 섹션: 운동 부위, 운동 종목, 사진 - 항상 표시됨
-  Widget _buildCommonInfoSection() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 운동 부위 / 종목 입력
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: _SimpleTextField(
-                  label: '운동 부위',
-                  hint: '등',
-                  initialValue: widget.exercise.targetPart,
-                  onChanged: (v) => widget.exercise.targetPart = v,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 3,
-                child: _SimpleTextField(
-                  label: '운동 종목',
-                  hint: '랫 풀 다운',
-                  initialValue: widget.exercise.name,
-                  onChanged: (v) => widget.exercise.name = v,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // 사진 슬롯
-          Row(
-            children: const [
-              _PhotoSlot(),
-              SizedBox(width: 12),
-              _PhotoSlot(),
-            ],
-          ),
         ],
       ),
     );
@@ -337,7 +287,52 @@ class _ExerciseCardState extends State<ExerciseCard> {
   Widget _buildDigitalSetInput() {
     return Column(
       key: const ValueKey('digital_input'),
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ========== 공통 정보 섹션 (운동 부위, 종목, 사진) ==========
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 운동 부위 / 종목 입력
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _SimpleTextField(
+                      label: '운동 부위',
+                      hint: '등',
+                      initialValue: widget.exercise.targetPart,
+                      onChanged: (v) => widget.exercise.targetPart = v,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 3,
+                    child: _SimpleTextField(
+                      label: '운동 종목',
+                      hint: '랫 풀 다운',
+                      initialValue: widget.exercise.name,
+                      onChanged: (v) => widget.exercise.name = v,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // 사진 슬롯
+              Row(
+                children: const [
+                  _PhotoSlot(),
+                  SizedBox(width: 12),
+                  _PhotoSlot(),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // ========== 구분선 + 세트 기록 라벨 ==========
+        _buildSetSectionDivider(),
         const SizedBox(height: 8),
         // 세트 헤더
         Padding(
