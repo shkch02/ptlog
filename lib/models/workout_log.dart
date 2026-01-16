@@ -134,6 +134,7 @@ class WorkoutLog {
   final String overallNotes;
   final String reminderForNext;
   final List<String> photos;
+  final String? trainerMemo; // 트레이너 전용 메모 (회원에게 보이지 않음)
 
   WorkoutLog({
     required this.id,
@@ -145,6 +146,7 @@ class WorkoutLog {
     required this.overallNotes,
     required this.reminderForNext,
     required this.photos,
+    this.trainerMemo,
   });
 
   WorkoutLog copyWith({
@@ -157,6 +159,7 @@ class WorkoutLog {
     String? overallNotes,
     String? reminderForNext,
     List<String>? photos,
+    String? trainerMemo,
   }) {
     return WorkoutLog(
       id: id ?? this.id,
@@ -168,6 +171,7 @@ class WorkoutLog {
       overallNotes: overallNotes ?? this.overallNotes,
       reminderForNext: reminderForNext ?? this.reminderForNext,
       photos: photos ?? this.photos,
+      trainerMemo: trainerMemo ?? this.trainerMemo,
     );
   }
 
@@ -182,6 +186,7 @@ class WorkoutLog {
       'overallNotes': overallNotes,
       'reminderForNext': reminderForNext,
       'photos': photos,
+      'trainerMemo': trainerMemo,
     };
   }
 
@@ -196,6 +201,7 @@ class WorkoutLog {
       overallNotes: json['overallNotes'],
       reminderForNext: json['reminderForNext'],
       photos: List<String>.from(json['photos']),
+      trainerMemo: json['trainerMemo'],
     );
   }
 }

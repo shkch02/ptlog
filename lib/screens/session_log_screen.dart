@@ -19,11 +19,13 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
   final List<ExerciseForm> _exercises = [ExerciseForm()];
   final TextEditingController _feedbackController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
+  final TextEditingController _trainerMemoController = TextEditingController();
 
   @override
   void dispose() {
     _feedbackController.dispose();
     _memoController.dispose();
+    _trainerMemoController.dispose();
     super.dispose();
   }
 
@@ -102,11 +104,71 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
               controller: _memoController,
               maxLines: 2,
             ),
+            const SizedBox(height: 24),
+            // 5. 트레이너 전용 메모 (회원에게 보이지 않음)
+            _buildTrainerMemoSection(),
             const SizedBox(height: 100),
           ],
         ),
       ),
       bottomNavigationBar: _buildBottomActions(context),
+    );
+  }
+
+  /// 트레이너 전용 메모 섹션 (회원에게 보이지 않음)
+  Widget _buildTrainerMemoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(LucideIcons.lock, size: 18, color: Colors.orange),
+            const SizedBox(width: 8),
+            const Text(
+              '다음 세션에 참고할 메모',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const SizedBox(width: 26),
+            Text(
+              '회원에게 보이지 않습니다',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _trainerMemoController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: '다음 세션 전에 확인할 내용을 메모하세요.',
+            filled: true,
+            fillColor: Colors.orange.withValues(alpha: 0.05),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.orange.withValues(alpha: 0.3)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.orange.withValues(alpha: 0.3)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.orange),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

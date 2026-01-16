@@ -56,6 +56,16 @@ The core application logic resides within the `lib/` directory:
     -   Use the defined **Repositories** to interact with data. UI widgets should not access `mock_data.dart` directly.
     -   Utilize constants from `lib/constants/` for consistent UI styling.
 
+## Security Guidelines
+
+**IMPORTANT:** As the project moves towards backend integration for authentication and login, security becomes a top priority. All development must adhere to the following principles:
+
+-   **Secret Management:** Never hardcode API keys, tokens, or other secrets directly in the source code. Use environment variables (e.g., via `.env` files and a package like `flutter_dotenv`) to manage sensitive information. Ensure that any secret files are listed in `.gitignore`.
+-   **Secure Communication:** All communication with the backend must use HTTPS. When creating the API service layer (e.g., with `dio`), ensure the base URL is `https://` and that certificate validation is not disabled in production builds.
+-   **Token Handling:** Authentication tokens (e.g., JWT) received from the backend should be stored securely on the device using packages like `flutter_secure_storage`. Avoid storing them in `SharedPreferences` or other insecure locations.
+-   **Input Validation:** Do not trust any data coming from the backend without validation. Similarly, validate all user input on the client side before sending it to the backend.
+-   **No Sensitive Data in Logs:** Do not log sensitive information such as passwords, tokens, or personal user data in debug or production logs.
+
 ## Common Commands
 
 -   **Install/Update Dependencies**: `flutter pub get`
