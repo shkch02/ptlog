@@ -1,7 +1,7 @@
 // 사용자(트레이너) 정보를 관리하는 User 데이터 모델을 정의합니다.
 
 class User {
-  final int id;
+  final String id;
   final String name;
   final String email;
 
@@ -13,7 +13,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String? ?? '',
       email: json['email'] as String,
     );
@@ -28,7 +28,7 @@ class User {
   }
 
   User copyWith({
-    int? id,
+    String? id,
     String? name,
     String? email,
   }) {
