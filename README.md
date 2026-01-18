@@ -1,101 +1,109 @@
-# PT-Log: 피티로그 (PT 회원 관리 솔루션)
+# PTLog - 피트니스 트레이너를 위한 회원 관리 앱
 
-`PT-Log`는 퍼스널 트레이너를 위한 모바일 회원 관리 애플리케이션입니다. 흩어져 있는 회원 정보, 스케줄, 운동 일지를 하나의 앱에서 체계적으로 관리하여 트레이너가 수업에만 집중할 수 있도록 돕습니다.
+PTLog는 피트니스 트레이너가 회원을 효율적으로 관리하고, 수업 스케줄을 계획하며, 운동 일지를 기록할 수 있도록 돕는 크로스 플랫폼 애플리케이션입니다. Flutter와 Riverpod를 기반으로 구축되어 반응형 UI와 확장 가능한 아키텍처를 제공합니다.
 
-## 1. 주요 기능
+## 주요 기능 (현재 구현 기준)
 
--   **대시보드 (홈 화면)**: 오늘 예정된 수업, 재등록이 필요한 회원을 한눈에 파악합니다.
--   **회원 관리**: 전체 회원 목록을 검색하고, 신규 회원을 등록하며, 각 회원의 상세 정보(기본 정보, PT 세션 내역, 상세 메모, 결제 내역)를 관리합니다.
--   **스케줄 관리**: 일별/주별/월별 스케줄을 확인하고, 새로운 PT 세션을 예약합니다.
--   **운동 일지 작성 및 조회**: PT 세션이 끝난 후, 운동 내역과 피드백을 기록하고 과거의 운동 기록을 조회할 수 있습니다.
+-   **대시보드 (`HomeScreen`):**
+    -   오늘 예정된 수업 목록을 시간순으로 표시합니다.
+    -   예약된 수업이 없을 경우, 수동으로 세션을 시작할 수 있는 UI를 제공합니다.
+    -   각 수업 카드를 통해 회원 상세 정보 조회 또는 운동 일지 작성을 시작할 수 있습니다.
 
-## 2. 기술 스택 및 주요 라이브러리
+-   **회원 관리 (`MemberListScreen`):**
+    -   트레이너에게 등록된 모든 활성 회원을 목록 형태로 보여줍니다.
+    -   이름, 전화번호로 회원을 실시간 검색할 수 있습니다.
+    -   **신규 회원 등록:** 다이얼로그를 통해 새 회원의 기본 정보를 추가하고, 현재 트레이너와 자동으로 연결합니다.
+    -   **회원 상세 정보:** 탭(Tab) 기반 UI로 회원의 PT 세션 이력, 기본 정보, 상세 메모, 설정을 관리합니다.
+        -   **PT 세션:** 과거 및 예정된 모든 수업 이력을 조회하고, 지난 수업의 운동 기록을 확인할 수 있습니다.
+        -   **기본 정보:** 인적사항과 키, 체중 등 상세한 신체 정보를 조회하고 수정합니다.
+        -   **상세 메모:** 회원 관련 특이사항 (부상 이력, 목표 등)을 자유롭게 기록하고 저장합니다.
+        -   **설정:** 회원을 '보관' 상태로 변경하거나 시스템에서 영구 '삭제'할 수 있습니다.
+    -   **보관된 회원 관리:** 별도 다이얼로그에서 보관된 회원 목록을 확인하고 다시 '복원'할 수 있습니다.
 
--   **Framework**: `Flutter 3.x`
--   **State Management**: `Riverpod`
--   **UI & Components**:
-    -   `lucide_icons`: 깔끔하고 일관된 아이콘 세트
+-   **스케줄 관리 (`ScheduleViewScreen`):**
+    -   주간(Weekly) 타임테이블 형식으로 트레이너의 모든 스케줄을 시각적으로 보여줍니다.
+    -   상단의 월간 캘린더를 통해 특정 날짜가 포함된 주로 빠르게 이동할 수 있습니다.
+    -   시간표의 빈 슬롯을 탭하여 새 세션을 추가하거나, 기존 세션을 탭하여 정보를 수정/삭제할 수 있습니다. (UI 구현 완료, 기능 연동 필요)
+
+-   **운동 일지 작성 (`SessionLogScreen`):**
+    -   수업 정보를 바탕으로 운동 일지를 작성합니다.
+    -   **디지털 입력:** 운동 종목, 부위, 세트(무게, 횟수, 휴식)를 키보드로 직접 입력합니다.
+    -   **필기 입력:** 템플릿 이미지 위에서 손글씨로 자유롭게 기록할 수 있습니다. (웹: Base64, 모바일: 파일로 저장)
+    -   운동별로 사진을 첨부할 수 있습니다. (UI 구현 완료, 기능 연동 필요)
+    -   수업에 대한 총평(피드백)과 다음 세션을 위한 메모를 남길 수 있습니다.
+
+## 기술 스택
+
+-   **프레임워크**: Flutter (Dart)
+-   **상태 관리**: Flutter Riverpod
+-   **아키텍처**: Repository Pattern, Service Layer
+-   **UI**: Material Design 3
+-   **주요 라이브러리**:
     -   `table_calendar`: 월간/주간 캘린더 UI
--   **Utilities**:
-    -   `intl`: 날짜 및 시간 포맷팅
+    -   `flutter_painter_v2`: 필기 입력 기능
+    -   `lucide_icons`: 아이콘 시스템
+    -   `intl`: 날짜 및 시간 포맷팅 (한국어 지원)
 
-## 3. 프로젝트 구조
+## 백엔드 구현 가이드 (API 설계 제안)
 
-프로젝트는 기능과 역할에 따라 명확하게 분리된 디렉토리 구조를 가집니다. 이는 유지보수성과 확장성을 높이기 위함입니다.
+이 프로젝트는 현재 Mock 데이터를 사용하고 있습니다. 실제 백엔드 연동을 위해 다음과 같은 데이터 모델과 API 엔드포인트를 설계할 수 있습니다.
+
+### 1. 데이터 모델 구조
+
+-   **`Member`**: 회원의 고유 정보 (이름, 연락처, 신체 정보 등)
+-   **`User`**: 사용자(트레이너) 정보
+-   **`TrainerMemberRelation`**: 트레이너와 회원 간의 '계약' 관계를 정의하는 중간 테이블. 한 명의 회원은 여러 트레이너와 관계를 맺을 수 있습니다.
+-   **`Schedule`**: 특정 `TrainerMemberRelation`에 종속되는 수업 스케줄.
+-   **`WorkoutLog`**: 완료된 `Schedule`에 대한 상세 운동 기록.
+-   **`PaymentLog`**: `TrainerMemberRelation`에 대한 결제 이력.
+
+### 2. Repository 기반 API 엔드포인트 설계
+
+프론트엔드의 Repository 클래스는 백엔드 API와 1:1로 매칭될 수 있습니다.
+
+-   **`AuthRepository`**
+    -   `login(email, password)` → `POST /api/auth/login`
+-   **`RelationRepository`**
+    -   `getActiveRelationsForTrainer(trainerId)` → `GET /api/trainers/{trainerId}/relations?active=true`
+    -   `createRelation(trainerId, memberId)` → `POST /api/relations`
+-   **`MemberRepository`**
+    -   `getMembersForTrainer(trainerId)` → `GET /api/trainers/{trainerId}/members`
+    -   `addMember(member)` → `POST /api/members`
+    -   `archiveMember(memberId)` → `PATCH /api/members/{memberId}/archive`
+-   **`ScheduleRepository`**
+    -   `getSchedulesForTrainerByDate(trainerId, date)` → `GET /api/trainers/{trainerId}/schedules?date={date}`
+    -   `addSchedule(schedule)` → `POST /api/schedules`
+-   **`WorkoutLogRepository`**
+    -   `getLogBySchedule(memberId, date)` → `GET /api/logs?memberId={memberId}&date={date}`
+    -   `createLog(log)` → `POST /api/logs`
+
+## 프로젝트 구조
 
 ```
-/lib
-├── constants/      # 앱 전역에서 사용되는 상수 (색상, 텍스트 스타일 등)
-├── data/           # 임시 데이터 (Mock Data)
-├── models/         # 데이터 모델 클래스 (Member, Schedule 등)
-├── providers/      # Riverpod Provider 정의
-├── repositories/   # 데이터 소스 제어 (API 통신, DB 접근 등)
-├── screens/        # 전체 화면 단위의 UI 위젯
-└── widgets/        # 재사용 가능한 작은 UI 컴포넌트
+lib/
+├── main.dart                 # 앱 진입점
+├── constants/                # 앱 전역 상수 (색상, 스타일, 문자열 등)
+├── data/
+│   └── mock_data.dart        # 현재 사용 중인 목업 데이터
+├── models/                   # 데이터 모델 (Member, Schedule 등)
+├── providers/                # Riverpod 프로바이더 (상태 관리)
+├── repositories/             # 데이터 접근 레이어 (API 통신 추상화)
+├── screens/                  # 주요 화면 (로그인, 홈, 회원 목록 등)
+├── services/                 # 비즈니스 로직 서비스 (HandwritingService 등)
+└── widgets/                  # 재사용 가능한 UI 컴포넌트
+    ├── member_detail_tabs/   # 회원 상세 정보의 탭 위젯
+    └── session_log/          # 세션 로그 관련 위젯
 ```
 
--   **`/constants`**: 색상(`app_colors.dart`), 텍스트 스타일(`app_text_styles.dart`), 문자열(`app_strings.dart`) 등 하드코딩을 피하기 위한 값들을 모아둡니다. UI를 수정할 때 일관성을 유지하기 위해 이곳의 값을 사용해야 합니다.
+## 실행 방법
 
--   **`/data`**: 현재 백엔드 없이 앱을 구동하기 위한 임시 데이터(`mock_data.dart`)가 들어있습니다. 향후 실제 백엔드가 구현되면 이 부분은 제거되거나 테스트용으로만 사용됩니다.
-
--   **`/models`**: 애플리케이션의 핵심 데이터 구조를 정의합니다. 모든 모델 클래스는 불변성(Immutability)을 유지하기 위해 `copyWith` 메서드를 포함하며, 서버 통신을 대비해 `toJson`, `fromJson` 메서드를 구현해두었습니다.
-
--   **`/repositories`**: 데이터 소스와의 통신을 담당하는 **데이터 계층**입니다. UI는 Repository가 어디서 데이터를 가져오는지(Mock Data인지, API 서버인지) 알 필요가 없습니다. 데이터 관련 로직은 모두 이곳에서 처리합니다.
-
--   **`/providers`**: **Riverpod 상태 관리의 핵심**입니다. UI와 비즈니스 로직(데이터)을 분리하는 역할을 합니다.
-    -   `repository_providers.dart`: Repository 인스턴스를 생성하고 앱 전역에 제공합니다.
-    -   `home_providers.dart`, `schedule_providers.dart`: Repository로부터 데이터를 가져와 가공한 후, UI가 사용할 최종 상태(State)를 제공합니다. `FutureProvider`, `StateNotifierProvider` 등이 사용됩니다.
-
--   **`/screens`**: 사용자에게 보여지는 전체 페이지 단위의 UI입니다. 각 스크린은 `ConsumerWidget` 또는 `ConsumerStatefulWidget`으로 작성되어 `ref.watch`를 통해 Provider가 제공하는 데이터를 구독하고, 데이터가 변경되면 자동으로 UI를 갱신합니다.
-
--   **`/widgets`**: 여러 화면에서 재사용될 수 있는 작은 UI 조각들입니다. 다이얼로그, 카드, 버튼 등이 포함됩니다. 복잡한 위젯은 하위 디렉토리(예: `member_detail_tabs/`)로 한번 더 그룹화하여 관리합니다.
-
-## 4. 아키텍처 및 데이터 흐름 (Riverpod)
-
-이 앱은 Riverpod를 사용한 단방향 데이터 흐름 아키텍처를 따릅니다. 이를 이해하는 것이 유지보수의 핵심입니다.
-
-**`UI` → `Provider` → `Repository` → `Data Source` → (State Update) → `UI`**
-
-1.  **UI (Screen/Widget)**: 사용자가 버튼을 클릭하는 등 이벤트를 발생시킵니다.
-2.  **Provider 호출**: UI는 `ref.read()`나 `ref.watch()`를 통해 Provider에 접근하고, Repository의 메서드를 호출하도록 요청합니다.
-    -   *예시: `ref.read(memberRepositoryProvider).addMember(newMember);`*
-3.  **Repository**: 요청을 받아 데이터 소스(현재는 `mock_data.dart`)의 데이터를 변경(추가, 수정, 삭제)합니다.
-4.  **상태 무효화 (Invalidation)**: 데이터 변경 후, Repository는 이 데이터와 관련된 Provider를 무효화(`ref.invalidate()`)하여 상태가 변경되었음을 Riverpod에 알립니다.
-    -   *예시: `ref.invalidate(allMembersProvider);`*
-5.  **UI 자동 갱신**: Riverpod는 무효화된 Provider를 재실행하여 새로운 데이터를 가져옵니다. 해당 Provider를 `ref.watch`하고 있던 모든 UI는 **자동으로 리빌드**되어 최신 데이터를 화면에 표시합니다.
-
-이 구조 덕분에 UI는 상태를 직접 관리할 필요가 없으며, 데이터 로직은 Repository에 캡슐화되어 코드가 명확하고 테스트하기 쉬워집니다.
-
-## 5. 시작 가이드
-
-1.  **Flutter SDK 설치**: Flutter 개발 환경이 설정되어 있어야 합니다.
-2.  **저장소 클론**: `git clone <repository-url>`
-3.  **패키지 설치**: 프로젝트 루트 디렉토리에서 아래 명령어를 실행합니다.
+1.  **Flutter SDK 설치**
+2.  **의존성 설치:**
     ```bash
     flutter pub get
     ```
-4.  **앱 실행**: 연결된 디바이스나 에뮬레이터에서 앱을 실행합니다.
+3.  **앱 실행:**
     ```bash
     flutter run
     ```
-    -   **데모 계정**: 로그인 화면에서 아무 버튼이나 누르면 `test`/`1234` 계정으로 로그인됩니다.
-
-## 6. 향후 유지보수 가이드
-
--   **새로운 기능(화면) 추가 시**:
-    1.  `/screens`에 새로운 화면 파일을 생성합니다.
-    2.  필요한 데이터가 있다면, `/repositories`에 데이터 로직을 추가하고 `/providers`에 새 Provider를 만듭니다.
-    3.  새로운 화면에서 `ref.watch`를 통해 Provider의 데이터를 사용합니다.
-
--   **UI 컴포넌트 수정 시**:
-    -   전체 페이지라면 `/screens`에서 해당 파일을 찾습니다.
-    -   재사용되는 작은 부분이라면 `/widgets`에서 관련 파일을 찾습니다.
-
--   **데이터 로직 변경 시**:
-    -   데이터를 가져오거나 변경하는 로직은 `/repositories` 디렉토리의 파일들을 수정하면 됩니다.
-
--   **백엔드 API 연동 방법**:
-    1.  `http` 또는 `dio` 패키지를 `pubspec.yaml`에 추가합니다.
-    2.  `/repositories` 디렉토리의 각 Repository 메서드 내부를 수정합니다.
-    3.  `Future.delayed`와 `mockMembers`를 사용하던 부분을 실제 API를 호출하는 코드로 교체합니다.
-    4.  **중요**: Repository 내부만 수정하면, Provider나 UI 코드는 거의 변경할 필요 없이 실제 서버 데이터와 연동됩니다. 이것이 현재 아키텍처의 가장 큰 장점입니다.
+    또는 VS Code, Android Studio에서 `F5` 키를 눌러 디버그 모드로 실행할 수 있습니다.

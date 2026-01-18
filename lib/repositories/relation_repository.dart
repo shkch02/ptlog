@@ -1,3 +1,4 @@
+// 트레이너-회원 관계와 관련된 데이터 처리를 담당하는 리포지토리입니다.
 import 'package:ptlog/data/mock_data.dart';
 import 'package:ptlog/models/trainer_member_relation.dart';
 

@@ -1,3 +1,4 @@
+// 스케줄 정보와 관련된 데이터 처리를 담당하는 리포지토리입니다.
 import 'package:ptlog/constants/app_strings.dart';
 import 'package:ptlog/repositories/relation_repository.dart';
 import '../models/index.dart';
@@ -8,7 +9,7 @@ class ScheduleRepository {
   final RelationRepository _relationRepository;
   ScheduleRepository(this._relationRepository);
 
-  // [시그니처 변경] 특정 트레이너의 하루 스케줄을 가져옴
+  // 특정트레이너의 특정 날짜에 잡힌 세션리스트 반환
   Future<List<Schedule>> getSchedulesForTrainerByDate(String trainerId, String dateStr) async {
     await Future.delayed(const Duration(milliseconds: 300));
     

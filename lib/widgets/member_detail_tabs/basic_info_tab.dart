@@ -1,3 +1,4 @@
+// 회원 상세 정보의 기본 정보 탭 위젯
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';

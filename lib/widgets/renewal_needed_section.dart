@@ -1,3 +1,4 @@
+// 재등록이 필요한 회원 목록 섹션 위젯
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';

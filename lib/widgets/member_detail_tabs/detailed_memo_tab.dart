@@ -1,3 +1,4 @@
+// 회원 상세 정보의 상세 메모 탭 위젯
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ptlog/constants/app_colors.dart';

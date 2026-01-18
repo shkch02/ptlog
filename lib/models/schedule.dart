@@ -1,3 +1,4 @@
+// 수업 스케줄 정보를 관리하는 Schedule 데이터 모델을 정의합니다.
 class Schedule {
   final String id;
   final String relationId; // 어떤 계약 관계에 속한 스케줄인지

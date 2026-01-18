@@ -1,3 +1,4 @@
+// 결제/세션 등록 이력을 관리하는 PaymentLog 데이터 모델을 정의합니다.
 class PaymentLog {
   final String id;
   final String relationId; // 어떤 계약 관계에 속한 결제인지

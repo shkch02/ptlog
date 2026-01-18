@@ -1,3 +1,4 @@
+// 트레이너와 회원 간의 관계(계약) 정보를 관리하는 데이터 모델을 정의합니다.
 class TrainerMemberRelation {
   final String id;
   final String trainerId;

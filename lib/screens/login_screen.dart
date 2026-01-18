@@ -1,3 +1,4 @@
+// 사용자 로그인 화면을 구성하는 위젯입니다.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ptlog/constants/app_colors.dart';

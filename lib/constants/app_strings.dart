@@ -1,3 +1,4 @@
+// 앱에서 사용하는 문자열, 날짜 형식 등 문자열 관련 상수를 정의합니다.
 class AppStrings {
   // Locales
   static const String localeKo = 'ko_KR';
