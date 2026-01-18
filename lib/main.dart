@@ -1,19 +1,41 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart'; // 날짜 포맷팅 초기화용 (필요시)
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:ptlog/constants/app_colors.dart';
 import 'screens/login_screen.dart';
 
 void main() async {
-  // 날짜 포맷팅 등 비동기 초기화가 필요할 때를 대비해 미리 바인딩
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 환경 변수 초기화
+  await _initializeEnvironment();
+
+  // 날짜 포맷팅 초기화
   await initializeDateFormatting('ko_KR', null);
-  
+
   runApp(
     const ProviderScope(
       child: PtTrainerApp(),
     ),
   );
+}
+
+/// 환경 변수를 초기화합니다.
+/// .env 파일이 없거나 로드에 실패해도 앱이 크래시되지 않도록 처리합니다.
+Future<void> _initializeEnvironment() async {
+  try {
+    await dotenv.load(fileName: '.env');
+    if (kDebugMode) {
+      print('[ENV] Environment variables loaded successfully');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('[ENV] Warning: Failed to load .env file: $e');
+      print('[ENV] The app will continue with default/fallback values.');
+    }
+  }
 }
 
 class PtTrainerApp extends StatelessWidget {
@@ -23,15 +45,14 @@ class PtTrainerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PT Trainer',
-      debugShowCheckedModeBanner: false, // 디버그 띠 제거
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        scaffoldBackgroundColor: AppColors.background, // 앱 전체 배경색 설정
-        fontFamily: 'Pretendard', // (만약 폰트 적용했다면)
+        scaffoldBackgroundColor: AppColors.background,
+        fontFamily: 'Pretendard',
       ),
-      // [수정] AppContainer 없이 바로 로그인 화면으로 시작!
-      home: const LoginScreen(), 
+      home: const LoginScreen(),
     );
   }
 }
